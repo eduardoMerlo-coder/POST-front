@@ -1,0 +1,5 @@
+/* Component-level styles for App, keep minimal. Prefer Tailwind utility classes in JSX. */
+@font-face {
+  font-family: "Satoshi";
+  src: url("@/assets/fonts/Satoshi-Variable.ttf") format("truetype");
+}
