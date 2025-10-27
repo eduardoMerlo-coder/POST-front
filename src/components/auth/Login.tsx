@@ -1,60 +1,17 @@
-import { useAuth } from "@/setup/hooks/useAuth";
-import { useState, useEffect, type FormEvent } from "react";
+import { type FormEvent } from "react";
+import { useLogin } from "./hook/useAuth";
 
 export const Login = () => {
-  const [error, setError] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-  const { login } = useAuth();
+  const { mutate, isPending, isError } = useLogin();
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    try {
-      const formData = new FormData(e.currentTarget);
-      const user = formData.get("user");
-      const password = formData.get("password");
-      if (!user || !password) return setError(true);
-
-      login?.("accessToken");
-      localStorage.setItem("user", JSON.stringify(user));
-
-      return;
-
-      setLoading(true);
-      fetch(`${import.meta.env.VITE_BASE_URL}/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: user,
-          password,
-        }),
-      })
-        .then((res) => res.json())
-        .then((res: any) => {
-          if (res.status >= 400) return setError(true);
-          const { accessToken, user } = res.data;
-          login?.(accessToken);
-          localStorage.setItem("user", JSON.stringify(user));
-        })
-        .catch(() => {
-          setError(true);
-        });
-      setLoading(false);
-    } catch {
-      setLoading(false);
-      setError(true);
-    }
+    const formData = new FormData(e.currentTarget);
+    const user = formData.get("user") as string;
+    const password = formData.get("password") as string;
+    if (!user || !password) return;
+    mutate({ name: user, password });
   };
-
-  useEffect(() => {
-    if (error) {
-      const timeout = setTimeout(() => {
-        setError(false);
-      }, 2000);
-      return () => clearTimeout(timeout);
-    }
-  }, [error]);
 
   return (
     <div className="bg-[url(/images/market.jpg)] bg-cover bg-no-repeat bg-center h-dvh w-full relative">
@@ -66,7 +23,7 @@ export const Login = () => {
         className={`bg-white backdrop-blur-sm w-4/5 rounded-lg px-6 py-10 shadow-lg absolute  left-1/2 top-1/2 -translate-1/2`}
       >
         <div className="text-2xl font-bold w-full text-center">Bienvenido</div>
-        {error && (
+        {isError && (
           <div
             className="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400 text-center"
             role="alert"
@@ -107,9 +64,9 @@ export const Login = () => {
           <button
             type="submit"
             className={`w-full text-md font-bold bg-[#f05656] hover:bg-[#f05656] py-3 px-8 rounded-lg transition-colors cursor-pointer mt-2 text-white`}
-            disabled={loading}
+            disabled={isPending}
           >
-            {!loading ? "Ingresar" : "Procesando..."}
+            {!isPending ? "Ingresar" : "Procesando..."}
           </button>
         </form>
       </div>

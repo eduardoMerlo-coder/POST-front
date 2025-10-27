@@ -1,14 +1,15 @@
 import { AuthPage } from "@/pages/AuthPage";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { PrivateRoutes } from "./PrivateRoutes";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../context/AuthContext";
 
 export const AppRoutes = () => {
-  const { token } = useAuth();
+  const { accessToken } = useAuth();
 
+  console.log("accessToken", accessToken);
   return (
     <Routes>
-      {token ? (
+      {accessToken ? (
         <>
           <Route path="/*" element={<PrivateRoutes />} />
           <Route path="/login" element={<Navigate to={"/"} replace />} />

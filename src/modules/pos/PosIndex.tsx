@@ -1,11 +1,10 @@
 import { BarCodeIcon, PlusIcon } from "@/Icons";
-import { useModal } from "@/setup/hooks/useModal";
+import { useModal } from "@/setup/context/ModalContext";
 import { useState } from "react";
 import BarcodeScannerComponent from "react-qr-barcode-scanner";
 
 export const PosIndex = () => {
   const [barcode, setBarcode] = useState<string>("");
-  const [cartProducts, setCardProducts] = useState<any[]>([]);
   const [listProducts, setListProducts] = useState<any[]>([]);
   const { setContent } = useModal();
 

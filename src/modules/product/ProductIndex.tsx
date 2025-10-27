@@ -6,19 +6,26 @@ import {
   type ColumnDef,
 } from "@tanstack/react-table";
 import { useMemo } from "react";
+import { useGetAllBaseProducts } from "./hook/useProduct";
+import { useAuth } from "@/setup/context/AuthContext";
 
 type ProductStatus = "active" | "inactive";
 
 export type Product = {
   name: string;
   price: string;
-  uom: string;
+  unitOfMeasure: {
+    unit: number;
+  };
   internalCode: string;
   barcode: number;
   status: ProductStatus;
 };
 
 export const ProductIndex = () => {
+  const { data, isLoading, error } = useGetAllBaseProducts();
+  const { role } = useAuth();
+
   const columns = useMemo<ColumnDef<Product, any>[]>(
     () => [
       {
@@ -27,12 +34,16 @@ export const ProductIndex = () => {
         header: () => <span>Nombre</span>,
         minSize: 200,
       },
-      {
-        accessorKey: "price",
-        cell: (info) => info.getValue(),
-        header: () => <span>Precio</span>,
-        minSize: 200,
-      },
+      ...(role === "admin"
+        ? [
+            {
+              accessorKey: "price",
+              cell: (info) => info.getValue(),
+              header: () => <span>Precio</span>,
+              minSize: 200,
+            },
+          ]
+        : []),
       {
         accessorKey: "uom",
         header: "Unidad de medida",
@@ -73,22 +84,16 @@ export const ProductIndex = () => {
   );
 
   const table = useReactTable({
-    data: [
-      {
-        name: "Producto 1",
-        price: "100",
-        uom: "1",
-        internalCode: "1",
-        barcode: 12121212,
-        status: "active",
-      } as Product,
-    ],
+    data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     debugTable: true,
     debugHeaders: true,
     debugColumns: true,
   });
+  if (error) return <>Se produjo un error</>;
+  if (isLoading) return <>Cargando...</>;
+
   return (
     <div className="flex flex-col gap-2">
       <div className="w-full flex gap-2 justify-end items-center">

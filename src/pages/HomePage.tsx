@@ -2,7 +2,7 @@ import { CartIcon } from "@/Icons";
 import { useNavigate } from "react-router-dom";
 
 export const MainPage = () => {
-  const user = JSON.parse(localStorage.getItem("user") ?? "");
+  const user = localStorage.getItem("user");
   const modules: {
     id: string;
     name: string;

@@ -1,8 +1,8 @@
 import { Outlet } from "react-router-dom";
 import { Profile } from "./Profile";
 import { Modal } from "../modal/Modal";
-import { useModal } from "@/setup/hooks/useModal";
 import { SidePanel } from "../panel/SidePanel";
+import { useModal } from "@/setup/context/ModalContext";
 
 export const ModuleLayout = () => {
   const { content } = useModal();

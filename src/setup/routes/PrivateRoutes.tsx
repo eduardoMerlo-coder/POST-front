@@ -2,7 +2,7 @@ import { ModuleLayout } from "@/components/layouts/ModuleLayout";
 import { ModuleShow } from "@/modules/ModuleShow";
 import { MainPage } from "@/pages/HomePage";
 import { Route, Routes } from "react-router-dom";
-import { ModalProvider } from "../provider/ModalProvider";
+import { ModalProvider } from "../context/ModalContext";
 
 export const PrivateRoutes = () => {
   return (

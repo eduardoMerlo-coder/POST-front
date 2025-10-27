@@ -1,7 +1,7 @@
 import { ChevronDownIcon, LogoutIcon } from "@/Icons";
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { axiosPrivate } from "@/lib/axios";
+import { useLogout } from "../auth/hook/useAuth";
+import { useNavigate } from "react-router-dom";
 
 export const Profile = () => {
   const [showOptions, setShowOptions] = useState<boolean>(false);
@@ -26,10 +26,12 @@ export const Profile = () => {
 };
 
 const ProfileOptions = () => {
-  const {} = useMutation(() => {
-    axiosPrivate.post("/logout");
-  }, {});
-  const handleLogout = () => {};
+  const { mutateAsync } = useLogout();
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    mutateAsync();
+    navigate("/");
+  };
   return (
     <div className="absolute top-[140%] right-0 z-50 bg-white rounded-lg shadow-lg border-1 border-gray-300/50 w-full overflow-hidden">
       <ul className="flex flex-col ">

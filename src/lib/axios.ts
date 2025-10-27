@@ -11,7 +11,7 @@ const authAxios = axios.create({
 });
 
 const axiosPrivate = axios.create({
-  baseURL: `${BASE_URL}/api/v1`,
+  baseURL: `${BASE_URL}/api`,
   headers: {
     "content-type": "application/json",
   },
@@ -30,7 +30,7 @@ axiosPrivate.interceptors.request.use(
 );
 
 axiosPrivate.interceptors.response.use(
-  (response) => response,
+  (response) => response.data,
   async (error) => {
     const originalRequest = error.config;
 
