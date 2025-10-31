@@ -8,6 +8,7 @@ import {
 import { useMemo } from "react";
 import { useGetAllBaseProducts } from "./hook/useProduct";
 import { useAuth } from "@/setup/context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 type ProductStatus = "active" | "inactive";
 
@@ -25,6 +26,7 @@ export type Product = {
 export const ProductIndex = () => {
   const { data, isLoading, error } = useGetAllBaseProducts();
   const { role } = useAuth();
+  const navigate = useNavigate();
 
   const columns = useMemo<ColumnDef<Product, any>[]>(
     () => [
@@ -38,7 +40,7 @@ export const ProductIndex = () => {
         ? [
             {
               accessorKey: "price",
-              cell: (info) => info.getValue(),
+              cell: (info: any) => info.getValue(),
               header: () => <span>Precio</span>,
               minSize: 200,
             },
@@ -114,6 +116,7 @@ export const ProductIndex = () => {
         <button
           type="button"
           className="text-white bg-blue-700 font-medium rounded-lg text-xs px-5 h-10 cursor-pointer"
+          onClick={() => navigate("/product/new-product")}
         >
           Nuevo Producto
         </button>

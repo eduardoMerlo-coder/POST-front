@@ -11,11 +11,16 @@ import { IoSearch } from "react-icons/io5";
 import { FaChevronUp } from "react-icons/fa";
 import { FaChevronDown } from "react-icons/fa";
 import { IoLogOutOutline } from "react-icons/io5";
+import { FaCamera } from "react-icons/fa";
 
 interface IconsProps {
   className?: string;
   style?: any;
 }
+
+export const CameraIcon = ({ className, style }: IconsProps) => (
+  <FaCamera className={className} style={style} />
+);
 
 export const HomeIcon = ({ className, style }: IconsProps) => (
   <IoHome className={className} style={style} />
