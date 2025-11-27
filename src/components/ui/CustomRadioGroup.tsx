@@ -1,42 +1,49 @@
 import { Radio, RadioGroup } from "@heroui/react";
+import { useState } from "react";
+import { useLocation } from "react-router-dom";
 export const CustomRadioGroup = ({
   handleChange,
-  value,
   items,
   title,
 }: {
   handleChange: (e: string) => void;
-  value?: string | null;
   items: { label: string; path: string }[];
   title?: string;
 }) => {
+  const { pathname } = useLocation();
+  const [selected, setSelected] = useState(pathname);
+
   return (
     <RadioGroup
       label={title}
       onChange={(e) => handleChange(e.target.value)}
-      value={value}
-      color="secondary"
+      value={selected}
       classNames={{
-        wrapper: "w-full",
+        wrapper: "w-full gap-3",
         base: "w-full",
       }}
+      onValueChange={setSelected}
     >
       {items.map((item) => (
         <Radio
+          key={item.path}
           value={item.path}
           size="sm"
-          className="hover:bg-secondary/10 w-full max-w-none"
+          className="hover:bg-secondary/10 w-full max-w-none rounded-sm"
           classNames={{
-            base: "border-zinc-600",
-            description: "text-zinc-600",
-            label: "text-zinc-600",
-
-            wrapper: "border-zinc-600",
+            base: "border-secondary",
+            description: "text-secondary",
+            label: "text-secondary ",
+            wrapper: "border-secondary/50 group-data-[selected=true]:border-accent/50",
             control:
-              "border-zinc-600 bg-zinc-600 opacity-100 scale-100 group-data-[selected=true]:bg-secondary",
+              "border-secondary bg-secondary/50 opacity-100 scale-100 group-data-[selected=true]:bg-accent",
           }}
         >
-          {item.label}
+          <span
+            className={`text-sm font-semibold pl-2 ${selected === item.path ? "text-accent" : "text-secondary"}`}
+          >
+            {item.label}
+          </span>
         </Radio>
       ))}
     </RadioGroup>

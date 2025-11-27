@@ -14,7 +14,6 @@ export const CustomAccordion = ({
   }[];
 }) => {
   const location = useLocation();
-  console.log(location.pathname);
   return (
     <Accordion selectionMode="multiple" showDivider>
       {items.map((item) => (
@@ -23,14 +22,16 @@ export const CustomAccordion = ({
           aria-label={item.title}
           title={
             <div
-              className={`flex gap-4 items-center text-sm text-gray-500 ${
-                location.pathname.includes(item.value) && "text-sky-300"
-              }`}
+              className={`flex gap-4 items-center font-semibold text-sm ${location.pathname.includes(item.value) ? "text-primary" : "text-secondary"}`}
             >
-              <TagIcon />
+              <TagIcon className="text-accent" />
               {item.title}
             </div>
           }
+          classNames={{
+            indicator: "text-primary",
+            trigger: "pr-4"
+          }}
         >
           {item.content}
         </AccordionItem>

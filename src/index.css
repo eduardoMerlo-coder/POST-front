@@ -6,6 +6,26 @@
 @source '../node_modules/@heroui/react/**/*.{js,ts,jsx,tsx}';
 @custom-variant dark (&:is(.dark *));
 
+/* Tailwind v4 Theme Configuration */
+@theme {
+  /* Background Colors */
+  --color-base: var(--bg-base);
+  --color-base-alt: var(--bg-base-alt);
+  --color-surface: var(--surface);
+  --color-surface-alt: var(--surface-alt);
+
+  /* Text Colors */
+  --color-primary: var(--text-primary);
+  --color-secondary: var(--text-secondary);
+
+  /* Border Colors */
+  --color-border: var(--border);
+
+  /* Accent Colors */
+  --color-accent: var(--accent);
+  --color-accent-alt: var(--accent-alt);
+}
+
 /* Poppins Font Face */
 @font-face {
   font-family: "Poppins";
@@ -14,6 +34,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Poppins";
   src: url("./assets/font/Poppins-Regular.ttf") format("truetype");
@@ -21,6 +42,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Poppins";
   src: url("./assets/font/Poppins-Medium.ttf") format("truetype");
@@ -28,6 +50,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Poppins";
   src: url("./assets/font/Poppins-SemiBold.ttf") format("truetype");
@@ -35,6 +58,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Poppins";
   src: url("./assets/font/Poppins-Bold.ttf") format("truetype");
@@ -42,6 +66,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Poppins";
   src: url("./assets/font/Poppins-Black.ttf") format("truetype");
@@ -59,12 +84,25 @@
 
 /* Root variables and base typography */
 :root {
-  --background: #0b0b0c;
-  --foreground: #e6e7eb;
-  --muted: #9aa3b2;
-  --border: #2a2d33;
-  --accent: #4f46e5;
-  --accent-foreground: #ffffff;
+  /* Light mode colors (default) */
+  --bg-base: #f8f9fa;
+  /* Gris muy suave en lugar de blanco puro */
+  --bg-base-alt: #ffffff;
+  /* Blanco para cards/surfaces */
+  --text-primary: #1a1a1a;
+  /* Negro suave */
+  --text-secondary: #6b7280;
+  /* Gris medio */
+  --surface: #ffffff;
+  /* Blanco para cards */
+  --surface-alt: #f3f4f6;
+  /* Gris muy claro */
+  --border: #e5e7eb;
+  /* Borde suave */
+  --accent: #f31260;
+  /* Rosa/rojo de acento */
+  --accent-alt: #d10f52;
+  /* Rosa más oscuro en hover */
 
   font-family: "Poppins", system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -76,15 +114,26 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --background: #f7f7f7;
-    --foreground: #0b0b0c;
-    --muted: #4b5565;
-    --border: #e5e7eb;
-    --accent: #4f46e5;
-    --accent-foreground: #ffffff;
-  }
+/* Dark mode colors */
+.dark {
+  --bg-base: #080808;
+  /* Negro profundo */
+  --bg-base-alt: #111418;
+  /* Negro menos profundo */
+  --text-primary: #ffffff;
+  /* Blanco */
+  --text-secondary: #d4d4d8;
+  /* Gris claro */
+  --surface: #202328;
+  /* Superficie oscura */
+  --surface-alt: #2a2e38;
+  /* Superficie alternativa */
+  --border: #2a2e38;
+  /* Borde oscuro */
+  --accent: #f31260;
+  /* Rosa/rojo de acento */
+  --accent-alt: #343843;
+  /* Rosa más brillante en hover */
 }
 
 html,
@@ -96,8 +145,8 @@ body,
 body {
   min-width: 320px;
   min-height: 100vh;
-  background-color: var(--background);
-  color: var(--foreground);
+  background-color: var(--bg-base);
+  color: var(--text-primary);
 }
 
 img,
@@ -107,56 +156,4 @@ canvas,
 svg {
   display: block;
   max-width: 100%;
-}
-
-details {
-  max-width: 60ch;
-
-  &[open] summary::after {
-    rotate: -180deg;
-  }
-
-  summary {
-    /* Override default "display: list-item" and position the summary text as well as the custom arrow icon */
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-
-    /* General styling */
-    cursor: pointer;
-    font-weight: 500;
-    margin-block-end: 0.5rem;
-    padding: 0.75rem;
-
-    /* Fallback code to hide standard marker, especially on Safari */
-    &::marker,
-    &::-webkit-details-marker {
-      display: none;
-    }
-
-    &::after {
-      --shape-chevron-width: 10px;
-      --s: calc(var(--shape-chevron-width) / 4);
-
-      /* Styling */
-      content: "";
-      aspect-ratio: 7/5;
-      background: currentColor;
-      clip-path: polygon(
-        0 0,
-        0 var(--s),
-        50% 100%,
-        100% var(--s),
-        100% 0,
-        50% calc(100% - var(--s))
-      );
-      flex-shrink: 0;
-      width: var(--shape-chevron-width);
-
-      /* Animation */
-      rotate: 0deg;
-      transition: rotate 0.35s ease;
-    }
-  }
 }

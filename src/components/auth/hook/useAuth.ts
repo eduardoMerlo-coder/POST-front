@@ -1,4 +1,4 @@
-import { axiosPrivate } from "@/lib/axios";
+import { supabase } from "@/lib/supabaseClient";
 import { ActionEnum } from "@/setup/auth.types";
 import { useAuth } from "@/setup/context/AuthContext";
 import { useMutation } from "@tanstack/react-query";
@@ -9,10 +9,17 @@ export const useLogin = () => {
   const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: (data: { name: string; password: string }) =>
-      axiosPrivate.post("/login", data),
-    onSuccess: (res: any) => {
-      dispatch?.({ type: ActionEnum.Login, payload: res.data });
+    mutationFn: async (data: { email: string; password: string }) => {
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+
+      if (error) throw error;
+      return authData;
+    },
+    onSuccess: (authData) => {
+      dispatch?.({ type: ActionEnum.Login, payload: authData });
       navigate("/product", { replace: true });
     },
   });
@@ -22,7 +29,10 @@ export const useLogout = () => {
   const { dispatch } = useAuth();
   const navigate = useNavigate();
   return useMutation({
-    mutationFn: () => axiosPrivate.post("/logout"),
+    mutationFn: async () => {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    },
     onSuccess: () => {
       dispatch?.({ type: ActionEnum.Logout });
       navigate("/login", { replace: true });

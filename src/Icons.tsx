@@ -14,11 +14,21 @@ import { IoLogOutOutline } from "react-icons/io5";
 import { FaCamera } from "react-icons/fa";
 import { AiOutlineCloudUpload } from "react-icons/ai";
 import { IoIosBarcode } from "react-icons/io";
+import { HiMiniXMark } from "react-icons/hi2";
+import { PiFileImage } from "react-icons/pi";
 
 interface IconsProps {
   className?: string;
   style?: any;
+  onClick?: () => void;
 }
+
+export const ImageIcon = ({ className, style }: IconsProps) => (
+  <PiFileImage className={className} style={style} />
+);
+export const XIcon = ({ className, style }: IconsProps) => (
+  <HiMiniXMark className={className} style={style} />
+);
 
 export const CameraIcon = ({ className, style }: IconsProps) => (
   <FaCamera className={className} style={style} />
@@ -67,12 +77,12 @@ export const PlusIcon = ({ className, style }: IconsProps) => (
   <FaPlus className={className} style={style} />
 );
 
-export const EyeIcon = ({ className, style }: IconsProps) => (
-  <IoEyeOutline className={className} style={style} />
+export const EyeIcon = ({ className, style, onClick }: IconsProps) => (
+  <IoEyeOutline className={className} style={style} onClick={onClick} />
 );
 
-export const TrashIcon = ({ className, style }: IconsProps) => (
-  <FaRegTrashCan className={className} style={style} />
+export const TrashIcon = ({ className, style, onClick }: IconsProps) => (
+  <FaRegTrashCan className={className} style={style} onClick={onClick} />
 );
 
 export const TagIcon = ({ className, style }: IconsProps) => (

@@ -1,25 +1,20 @@
-import { AuthPage } from "@/pages/AuthPage";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { PrivateRoutes } from "./PrivateRoutes";
-import { useAuth } from "../context/AuthContext";
+import { RequireSession } from "./components/RequireSession";
+import { AuthPage } from "@/pages/AuthPage";
 
 export const AppRoutes = () => {
-  const { accessToken } = useAuth();
-
-  console.log("accessToken", accessToken);
   return (
     <Routes>
-      {accessToken ? (
-        <>
-          <Route path="/*" element={<PrivateRoutes />} />
-          <Route path="/login" element={<Navigate to={"/"} replace />} />
-        </>
-      ) : (
-        <>
-          <Route path="*" element={<Navigate to={"/login"} replace />} />
-          <Route path="/login" element={<AuthPage />} />
-        </>
-      )}
+      <Route path="/login" element={<AuthPage />} />
+      <Route
+        path="/*"
+        element={
+          <RequireSession>
+            <PrivateRoutes />
+          </RequireSession>
+        }
+      />
     </Routes>
   );
 };

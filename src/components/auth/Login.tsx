@@ -7,10 +7,10 @@ export const Login = () => {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const user = formData.get("user") as string;
+    const email = formData.get("email") as string;
     const password = formData.get("password") as string;
-    if (!user || !password) return;
-    mutate({ name: user, password });
+    if (!email || !password) return;
+    mutate({ email, password });
   };
 
   return (
@@ -34,14 +34,14 @@ export const Login = () => {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 py-4">
           <div className="flex flex-col gap-2">
-            <label htmlFor="user" className="block text-sm font-semibold mb-1">
-              Usuario
+            <label htmlFor="email" className="block text-sm font-semibold mb-1">
+              Email
             </label>
             <input
-              type="text"
-              name="user"
+              type="email"
+              name="email"
               className="w-full p-3 rounded-md bg-white outline-none !text-sm border border-gray-200 focus:border-[#7f7f7f] transition-colors text-black"
-              placeholder="Ingresa tu nombre completo"
+              placeholder="Ingresa tu email"
               required
             />
           </div>

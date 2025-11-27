@@ -1,4 +1,5 @@
 import axios from "axios";
+import { supabase } from "./supabaseClient";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -18,17 +19,21 @@ const axiosPrivate = axios.create({
   withCredentials: true,
 });
 
+// Interceptor para agregar el token de Supabase a cada request
 axiosPrivate.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+  async (config) => {
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (session?.access_token) {
+      config.headers.Authorization = `Bearer ${session.access_token}`;
     }
+
     return config;
   },
   (error) => Promise.reject(error)
 );
 
+// Interceptor para manejar errores de autenticación
 axiosPrivate.interceptors.response.use(
   (response) => response.data,
   async (error) => {
@@ -39,31 +44,32 @@ axiosPrivate.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        // Llama al endpoint refresh del backend (usa cookie refreshToken)
-        const res = await authAxios.post(
-          "/auth/refresh",
-          {},
-          { withCredentials: true }
-        );
+        // Supabase maneja el refresh automáticamente
+        const { data: { session }, error: refreshError } = await supabase.auth.refreshSession();
 
-        // Guarda nuevo access token
-        const newToken = res.data.accessToken;
-        localStorage.setItem("accessToken", newToken);
+        if (refreshError || !session) {
+          throw refreshError || new Error("No session after refresh");
+        }
 
-        // Actualiza header y repite la solicitud original
-        axiosPrivate.defaults.headers.Authorization = `Bearer ${newToken}`;
-        originalRequest.headers.Authorization = `Bearer ${newToken}`;
-
+        // Actualiza el header con el nuevo token y reintenta la solicitud
+        originalRequest.headers.Authorization = `Bearer ${session.access_token}`;
         return axiosPrivate(originalRequest);
+
       } catch (refreshError) {
-        // Si falla el refresh → limpiar sesión y redirigir
-        localStorage.removeItem("accessToken");
+        // Si falla el refresh → cerrar sesión y redirigir
+        await supabase.auth.signOut();
         window.location.href = "/login";
         return Promise.reject(refreshError);
       }
     }
 
-    return Promise.reject(error);
+    const normalizedError = {
+      status: error.response?.status,
+      message: error.response?.data?.message || error.message,
+      data: error.response?.data,
+    };
+
+    return Promise.reject(normalizedError);
   }
 );
 

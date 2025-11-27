@@ -16,9 +16,8 @@ export const useAuth = () => useContext(AuthContext);
 const authReducer = (state: AuthContextType, action: ActionType) => {
   switch (action.type) {
     case ActionEnum.Login: {
-      localStorage.setItem("accessToken", action.payload.accessToken);
-      localStorage.setItem("user", action.payload.user.name);
-      localStorage.setItem("role", action.payload.user.role);
+      localStorage.setItem("user", action.payload.user.email);
+      localStorage.setItem("role", action.payload.user.user_metadata.role_id);
       return { ...state, ...action.payload };
     }
     case ActionEnum.Logout: {
@@ -38,8 +37,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     user: localStorage.getItem("user"),
     role: localStorage.getItem("role"),
   });
-
-  console.log(authState);
 
   return (
     <AuthContext.Provider value={{ ...authState, dispatch }}>
