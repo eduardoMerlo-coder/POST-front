@@ -1,14 +1,13 @@
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
 import { useCreateProduct } from "../hooks/useProduct";
-import { ProductForm } from "../components/ProductForm";
 import type { ProductForm as ProductFormType } from "../product.type";
+import type { UseFormReset } from "react-hook-form";
+import { ProductForm } from "../components/ProductFormAdmin";
 
-export const NewProduct = () => {
-  const navigate = useNavigate();
+export const NewProductAdmin = () => {
   const { mutate: createProduct, isPending } = useCreateProduct();
 
-  const handleSubmit = (data: ProductFormType) => {
+  const handleSubmit = (data: ProductFormType, reset: UseFormReset<ProductFormType>) => {
     if (!data.barcode && !data.internal_code) {
       return toast.error(
         "Debe completar el campo codigo de barras o el codigo interno."
@@ -28,7 +27,7 @@ export const NewProduct = () => {
     createProduct(formattedData, {
       onSuccess: () => {
         toast.success("Producto creado !!!");
-        navigate("/product");
+        reset();
       },
       onError: (error: any) => {
         const message =

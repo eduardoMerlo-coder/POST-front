@@ -25,10 +25,11 @@ export const CapacityField = ({
                 classNames={{
                     inputWrapper: "bg-surface border-1 border-border data-[hover=true]:bg-surface",
                 }}
+                min={0}
             />
             <ErrorMessage
                 existError={!!errors.capacity}
-                msg={"El valor debe ser al menos 1."}
+                msg={"Capacidad debe ser al menos 1."}
             />
         </div>
     );

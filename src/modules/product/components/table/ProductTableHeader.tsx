@@ -23,7 +23,7 @@ export const ProductTableHeader = ({
 
     return (
         <div className="w-full flex gap-2 justify-end items-center">
-            <form className="flex items-center w-1/2">
+            <div className="flex items-center w-1/2">
                 <div className="relative w-full">
                     <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                         <SearchIcon />
@@ -36,7 +36,7 @@ export const ProductTableHeader = ({
                         onChange={handleSearchChange}
                     />
                 </div>
-            </form>
+            </div>
             <button
                 type="button"
                 className="text-primary bg-accent font-medium rounded-lg text-xs px-5 h-10 cursor-pointer hover:opacity-90 transition-colors"

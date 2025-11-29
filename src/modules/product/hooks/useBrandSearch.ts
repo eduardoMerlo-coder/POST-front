@@ -31,7 +31,7 @@ export const useBrandSearch = (brands: Brand[]) => {
                 ? [{ id: "create", name: `Crear "${search}"` }]
                 : [];
 
-        return [...createOption, ...filtered];
+        return [...filtered, ...createOption];
     }, [brands, search]);
 
     return {

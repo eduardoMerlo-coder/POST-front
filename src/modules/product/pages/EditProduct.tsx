@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useGetBaseProductById, useUpdateProduct } from "../hooks/useProduct";
-import { ProductForm } from "../components/ProductForm";
+import { ProductForm } from "../components/ProductFormAdmin";
 import type { ProductForm as ProductFormType } from "../product.type";
 
 export const EditProduct = () => {

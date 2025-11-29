@@ -4,14 +4,14 @@ import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import type { ProductForm as ProductFormType } from "../product.type";
-import { ProductNameField } from "../components/form/ProductNameField";
-import { InternalCodeField } from "../components/form/InternalCodeField";
-import { BarcodeField } from "../components/form/BarcodeField";
-import { UnitOfMeasureField } from "../components/form/UnitOfMeasureField";
-import { BrandAutocompleteField } from "../components/form/BrandAutocompleteField";
-import { PackagingTypeField } from "../components/form/PackagingTypeField";
-import { CapacityField } from "../components/form/CapacityField";
-import { CategoriesField } from "../components/form/CategoriesField";
+import { ProductNameField } from "./form/ProductNameField";
+import { InternalCodeField } from "./form/InternalCodeField";
+import { BarcodeField } from "./form/BarcodeField";
+import { UnitOfMeasureField } from "./form/UnitOfMeasureField";
+import { BrandAutocompleteField } from "./form/BrandAutocompleteField";
+import { PackagingTypeField } from "./form/PackagingTypeField";
+import { CapacityField } from "./form/CapacityField";
+import { CategoriesField } from "./form/CategoriesField";
 import {
     useCreateBrand,
     useGetAllCategories,
@@ -22,7 +22,7 @@ import {
 
 interface ProductFormProps {
     initialData?: Partial<ProductFormType>;
-    onSubmit: (data: ProductFormType) => void;
+    onSubmit: (data: ProductFormType, reset: () => void) => void;
     isPending: boolean;
     isEditMode?: boolean;
 }
@@ -43,6 +43,18 @@ export const ProductForm = ({
         useGetAllCategories();
     const { data: brands = [], isLoading: loadingBrands } = useGetBrands();
 
+    const defaultValues: ProductFormType = {
+        name: "",
+        internal_code: "",
+        barcode: "",
+        brand_id: 0,
+        packaging_type_id: undefined,
+        capacity: 0,
+        unit_id: "",
+        categories: [],
+        business_types: [],
+    };
+
     // Form management
     const {
         handleSubmit,
@@ -53,43 +65,36 @@ export const ProductForm = ({
         reset,
         formState: { errors },
     } = useForm<ProductFormType>({
-        defaultValues: {
-            name: "",
-            internal_code: "",
-            barcode: "",
-            brand_id: 0,
-            packaging_type_id: undefined,
-            capacity: 0,
-            unit_id: "",
-            categories: [],
-        },
+        defaultValues,
+        mode: "onSubmit",
     });
 
     // Mutations
-    const { mutate: createBrand } = useCreateBrand();
+    const { mutate: createBrand, isPending: isCreatingBrand } = useCreateBrand();
 
     // Load initial data when in edit mode
     useEffect(() => {
         if (initialData) {
-            Object.entries(initialData).forEach(([key, value]) => {
-                setValue(key as keyof ProductFormType, value);
-            });
+            reset({ ...defaultValues, ...initialData });
         }
-    }, [initialData, setValue]);
+    }, [initialData, reset]);
 
     // Brand creation handler
     const handleCreateBrand = (
         name: string,
         onSuccess: (id: number, name: string) => void
     ) => {
+        if (isCreatingBrand) return;
         createBrand(
             { name },
             {
                 onSuccess: ({ data }) => {
+                    console.log("success", data);
                     toast.success("Marca creada exitosamente.");
                     onSuccess(Number(data.id), data.name);
                 },
                 onError: (error: any) => {
+                    console.log("eror", error);
                     const message = error?.data?.data?.message ?? "Error al crear marca";
                     toast.error(message);
                 },
@@ -111,7 +116,7 @@ export const ProductForm = ({
             <h2 className="text-2xl font-bold mb-6">
                 {isEditMode ? "Editar Producto" : "Nuevo Producto"}
             </h2>
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={handleSubmit((data) => onSubmit(data, reset))}>
                 <div className="grid gap-4 mb-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                     <ProductNameField
                         register={register}
@@ -143,6 +148,7 @@ export const ProductForm = ({
                         errors={errors}
                         brands={brands}
                         isLoading={loadingBrands}
+                        isCreating={isCreatingBrand}
                         isDisabled={isPending}
                         onCreateBrand={handleCreateBrand}
                     />

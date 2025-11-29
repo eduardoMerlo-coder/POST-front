@@ -1,7 +1,7 @@
 import { type ChangeEvent, useRef, useState } from "react";
 import { XIcon, ImageIcon, PlusIcon } from "@/Icons";
 import { useFieldArray, type Control } from "react-hook-form";
-import type { ProductForm } from "@/modules/product/pages/NewProduct";
+import type { ProductForm } from "@/modules/product/pages/NewProductAdmin";
 import { supabase } from "@/lib/supabaseClient";
 
 export type FileProps = {

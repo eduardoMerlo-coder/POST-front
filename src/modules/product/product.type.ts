@@ -19,7 +19,7 @@ export interface CatalogItem {
 }
 
 export interface UomItem extends CatalogItem {
-  unit: string;
+  name: string;
 }
 export interface PackagingTypeItem extends CatalogItem {
   name: string;
@@ -39,7 +39,7 @@ export interface BrandItemCreate {
   name: string;
 }
 
-export type ProductForm = {
+export interface ProductForm {
   name: string;
   internal_code: string;
   barcode: string;
@@ -50,3 +50,7 @@ export type ProductForm = {
   categories: string[];
   business_types: number[];
 };
+
+export interface ProductFormUserType extends ProductForm {
+  images: string[];
+}

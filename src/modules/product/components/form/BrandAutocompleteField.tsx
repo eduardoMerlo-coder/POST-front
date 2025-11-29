@@ -1,5 +1,6 @@
 import { Autocomplete, AutocompleteItem } from "@heroui/react";
-import { Controller, type Control, type FieldErrors } from "react-hook-form";
+import { Controller, type Control, type FieldErrors, useWatch } from "react-hook-form";
+import { useEffect } from "react";
 import { ErrorMessage } from "@/components/error/ErrorMessage";
 import type { ProductForm, BrandItemCreate } from "../../product.type";
 import { useBrandSearch } from "../../hooks/useBrandSearch";
@@ -14,6 +15,7 @@ interface BrandAutocompleteFieldProps {
     errors: FieldErrors<ProductForm>;
     brands: Brand[];
     isLoading?: boolean;
+    isCreating?: boolean;
     isDisabled?: boolean;
     onCreateBrand: (name: string, onSuccess: (id: number, name: string) => void) => void;
 }
@@ -23,11 +25,26 @@ export const BrandAutocompleteField = ({
     errors,
     brands,
     isLoading = false,
+    isCreating = false,
     isDisabled = false,
     onCreateBrand,
 }: BrandAutocompleteFieldProps) => {
-    const { search, rawSearch, setRawSearch, debouncedSetSearch, filteredItems } =
+    const { search, setSearch, rawSearch, setRawSearch, debouncedSetSearch, filteredItems } =
         useBrandSearch(brands);
+
+    const brandId = useWatch({
+        control,
+        name: "brand_id",
+    });
+
+    useEffect(() => {
+        if (brandId && brands.length > 0 && rawSearch === "") {
+            const selectedBrand = brands.find((b) => Number(b.id) === Number(brandId));
+            if (selectedBrand) {
+                setRawSearch(selectedBrand.name);
+            }
+        }
+    }, [brandId, brands, rawSearch, setRawSearch]);
 
     return (
         <div className="flex flex-col gap-2">
@@ -44,13 +61,16 @@ export const BrandAutocompleteField = ({
                     <div className="[&_[data-slot=input-wrapper]]:bg-surface [&_[data-slot=input-wrapper]]:border-1 [&_[data-slot=input-wrapper]]:border-border [&_[data-slot=input-wrapper]:hover]:bg-surface">
                         <Autocomplete
                             label="Marca"
-                            isDisabled={isLoading || isDisabled}
+                            isDisabled={isLoading || isDisabled || isCreating}
                             items={filteredItems}
                             inputValue={rawSearch}
                             radius="sm"
                             onInputChange={(value) => {
                                 setRawSearch(value);
                                 debouncedSetSearch(value);
+                                if (!value) {
+                                    field.onChange(0);
+                                }
                             }}
                             onBlur={() => {
                                 if (!field.value) {
@@ -62,12 +82,13 @@ export const BrandAutocompleteField = ({
                                 if (key === "create") {
                                     onCreateBrand(search, (id, name) => {
                                         field.onChange(Number(id));
+                                        setSearch(name);
                                         setRawSearch(name);
                                     });
                                     return;
                                 }
 
-                                const selectedBrand = brands.find((b) => Number(b.id) === key);
+                                const selectedBrand = brands.find((b) => Number(b.id) === Number(key));
                                 if (selectedBrand) {
                                     setRawSearch(selectedBrand.name);
                                     field.onChange(Number(selectedBrand.id));
@@ -80,7 +101,7 @@ export const BrandAutocompleteField = ({
                                 <AutocompleteItem
                                     key={brand.id}
                                     className={
-                                        brand.id === "create" ? " font-bold text-secondary" : ""
+                                        brand.id === "create" ? "font-bold text-accent" : ""
                                     }
                                 >
                                     {brand.name}
@@ -88,7 +109,8 @@ export const BrandAutocompleteField = ({
                             )}
                         </Autocomplete>
                     </div>
-                )}
+                )
+                }
             />
             <ErrorMessage existError={!!errors.brand_id} msg={errors.brand_id?.message} />
         </div>

@@ -5,7 +5,7 @@ import type { ProductForm } from "../../product.type";
 
 interface UnitOfMeasure {
     id: number;
-    unit: string;
+    name: string;
     description?: string;
 }
 
@@ -45,8 +45,8 @@ export const UnitOfMeasureField = ({
                         }}
                     >
                         {uomList.map((item) => (
-                            <SelectItem key={item.id.toString()} textValue={item.unit}>
-                                <span>{item.unit}</span>
+                            <SelectItem key={item.id.toString()} textValue={item.name}>
+                                <span>{item.name}</span>
                                 {item.description && (
                                     <p className="w-30 truncate">({item.description})</p>
                                 )}
