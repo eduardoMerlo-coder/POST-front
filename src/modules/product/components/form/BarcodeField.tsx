@@ -1,9 +1,9 @@
 import { Input } from "@heroui/react";
 import type { UseFormRegister } from "react-hook-form";
-import type { ProductForm } from "../../product.type";
+import type { ProductFormUserType } from "../../product.type";
 
 interface BarcodeFieldProps {
-    register: UseFormRegister<ProductForm>;
+    register: UseFormRegister<ProductFormUserType>;
     isDisabled?: boolean;
 }
 

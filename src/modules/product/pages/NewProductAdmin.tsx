@@ -2,7 +2,7 @@ import { toast } from "react-toastify";
 import { useCreateProduct } from "../hooks/useProduct";
 import type { ProductForm as ProductFormType } from "../product.type";
 import type { UseFormReset } from "react-hook-form";
-import { ProductForm } from "../components/ProductFormAdmin";
+import { ProductFormAdmin } from "../components/ProductFormAdmin";
 
 export const NewProductAdmin = () => {
   const { mutate: createProduct, isPending } = useCreateProduct();
@@ -39,5 +39,5 @@ export const NewProductAdmin = () => {
     });
   };
 
-  return <ProductForm onSubmit={handleSubmit} isPending={isPending} />;
+  return <ProductFormAdmin onSubmit={handleSubmit} isPending={isPending} />;
 };

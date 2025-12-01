@@ -1,7 +1,7 @@
 import { type ChangeEvent, useRef, useState } from "react";
 import { XIcon, ImageIcon, PlusIcon } from "@/Icons";
 import { useFieldArray, type Control } from "react-hook-form";
-import type { ProductForm } from "@/modules/product/pages/NewProductAdmin";
+import type { ProductFormUserType } from "@/modules/product/product.type";
 import { supabase } from "@/lib/supabaseClient";
 
 export type FileProps = {
@@ -10,9 +10,9 @@ export type FileProps = {
   url: string;
 };
 
-export const ImageUploader = ({ control }: { control: Control<any> }) => {
+export const ImageUploader = ({ control }: { control: Control<ProductFormUserType> }) => {
   const [uploading, setUploading] = useState(false);
-  const { fields, remove, append } = useFieldArray<ProductForm>({
+  const { fields, remove, append } = useFieldArray<ProductFormUserType>({
     control,
     name: "images",
   });

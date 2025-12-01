@@ -1,12 +1,12 @@
 import { Input } from "@heroui/react";
 import type { UseFormSetValue, UseFormWatch } from "react-hook-form";
-import type { ProductForm } from "../../product.type";
+import type { ProductFormUserType } from "../../product.type";
 import { generateInternalBarcode } from "../../utils";
 
 interface InternalCodeFieldProps {
     register: any;
-    setValue: UseFormSetValue<ProductForm>;
-    watch: UseFormWatch<ProductForm>;
+    setValue: UseFormSetValue<ProductFormUserType>;
+    watch: UseFormWatch<ProductFormUserType>;
     isDisabled?: boolean;
 }
 

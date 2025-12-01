@@ -1,4 +1,11 @@
-type ProductStatus = "active" | "inactive";
+import type { FileProps } from "@/components/uploader/ImageUploader";
+
+export const ProductStatusValues = {
+  ACTIVE: "ACTIVE",
+  INACTIVE: "INACTIVE"
+};
+
+export type ProductStatus = typeof ProductStatusValues[keyof typeof ProductStatusValues];
 
 export type Product = {
   id: number;
@@ -49,8 +56,13 @@ export interface ProductForm {
   unit_id: string;
   categories: string[];
   business_types: number[];
+  quantity_per_package: number;
 };
 
 export interface ProductFormUserType extends ProductForm {
-  images: string[];
+  stock_quantity: number;
+  min_stock: number;
+  status: ProductStatus;
+  images: FileProps[];
+  price: number;
 }

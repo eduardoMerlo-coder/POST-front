@@ -2,7 +2,7 @@ import { Autocomplete, AutocompleteItem } from "@heroui/react";
 import { Controller, type Control, type FieldErrors, useWatch } from "react-hook-form";
 import { useEffect } from "react";
 import { ErrorMessage } from "@/components/error/ErrorMessage";
-import type { ProductForm, BrandItemCreate } from "../../product.type";
+import type { ProductFormUserType, BrandItemCreate } from "../../product.type";
 import { useBrandSearch } from "../../hooks/useBrandSearch";
 
 interface Brand {
@@ -11,8 +11,8 @@ interface Brand {
 }
 
 interface BrandAutocompleteFieldProps {
-    control: Control<ProductForm>;
-    errors: FieldErrors<ProductForm>;
+    control: Control<ProductFormUserType>;
+    errors: FieldErrors<ProductFormUserType>;
     brands: Brand[];
     isLoading?: boolean;
     isCreating?: boolean;

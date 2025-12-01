@@ -6,7 +6,7 @@ import {
 } from "../auth.types";
 
 export const AuthContext = createContext<AuthContextType>({
-  accessToken: null,
+  user_id: null,
   role: null,
   user: null,
 });
@@ -17,14 +17,15 @@ const authReducer = (state: AuthContextType, action: ActionType) => {
   switch (action.type) {
     case ActionEnum.Login: {
       localStorage.setItem("user", action.payload.user.email);
+      localStorage.setItem("user_id", action.payload.user.id);
       localStorage.setItem("role", action.payload.user.user_metadata.role_id);
       return { ...state, ...action.payload };
     }
     case ActionEnum.Logout: {
-      localStorage.removeItem("accessToken");
       localStorage.removeItem("user");
+      localStorage.removeItem("user_id");
       localStorage.removeItem("role");
-      return { ...state, accessToken: null };
+      return { ...state, user: null, role: null, user_id: null };
     }
 
     default:
@@ -33,9 +34,9 @@ const authReducer = (state: AuthContextType, action: ActionType) => {
 };
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [authState, dispatch] = useReducer(authReducer, {
-    accessToken: localStorage.getItem("accessToken"),
     user: localStorage.getItem("user"),
     role: localStorage.getItem("role"),
+    user_id: localStorage.getItem("user_id"),
   });
 
   return (

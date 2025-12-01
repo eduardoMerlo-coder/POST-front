@@ -1,7 +1,7 @@
 import { Select, SelectItem } from "@heroui/react";
 import { Controller, type Control, type FieldErrors } from "react-hook-form";
 import { ErrorMessage } from "@/components/error/ErrorMessage";
-import type { ProductForm } from "../../product.type";
+import type { ProductFormUserType } from "../../product.type";
 
 interface UnitOfMeasure {
     id: number;
@@ -10,8 +10,8 @@ interface UnitOfMeasure {
 }
 
 interface UnitOfMeasureFieldProps {
-    control: Control<ProductForm>;
-    errors: FieldErrors<ProductForm>;
+    control: Control<ProductFormUserType>;
+    errors: FieldErrors<ProductFormUserType>;
     uomList?: UnitOfMeasure[];
     isLoading?: boolean;
     isDisabled?: boolean;

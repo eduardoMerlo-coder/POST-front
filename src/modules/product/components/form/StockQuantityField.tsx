@@ -3,22 +3,22 @@ import { ErrorMessage } from "@/components/error/ErrorMessage";
 import type { UseFormRegister, FieldErrors } from "react-hook-form";
 import type { ProductFormUserType } from "../../product.type";
 
-interface CapacityFieldProps {
+interface StockQuantityFieldProps {
     register: UseFormRegister<ProductFormUserType>;
     errors: FieldErrors<ProductFormUserType>;
     isDisabled?: boolean;
 }
 
-export const CapacityField = ({
+export const StockQuantityField = ({
     register,
     errors,
     isDisabled = false,
-}: CapacityFieldProps) => {
+}: StockQuantityFieldProps) => {
     return (
         <div className="flex flex-col gap-2">
             <Input
-                {...register("capacity", { min: 1 })}
-                label="Capacidad"
+                {...register("stock_quantity", { min: 0 })}
+                label="Stock"
                 type="number"
                 isDisabled={isDisabled}
                 radius="sm"
@@ -28,8 +28,7 @@ export const CapacityField = ({
                 min={0}
             />
             <ErrorMessage
-                existError={!!errors.capacity}
-                msg={"Capacidad debe ser al menos 1."}
+                existError={!!errors.stock_quantity}
             />
         </div>
     );

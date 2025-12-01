@@ -27,7 +27,7 @@ interface ProductFormProps {
     isEditMode?: boolean;
 }
 
-export const ProductForm = ({
+export const ProductFormAdmin = ({
     initialData,
     onSubmit,
     isPending,
@@ -53,6 +53,7 @@ export const ProductForm = ({
         unit_id: "",
         categories: [],
         business_types: [],
+        quantity_per_package: 1
     };
 
     // Form management
@@ -176,7 +177,7 @@ export const ProductForm = ({
                 </div>
 
                 <div className="flex gap-4 justify-end">
-                    <Button type="submit" disabled={isPending} className="bg-accent font-semibold">
+                    <Button type="submit" radius="sm" disabled={isPending} className="bg-accent font-semibold">
                         {isEditMode ? "Actualizar" : "Guardar"}
                     </Button>
                     <Button
@@ -184,6 +185,7 @@ export const ProductForm = ({
                         disabled={isPending}
                         onPress={handleCancel}
                         className="bg-surface-alt font-semibold"
+                        radius="sm"
                     >
                         Cancelar
                     </Button>

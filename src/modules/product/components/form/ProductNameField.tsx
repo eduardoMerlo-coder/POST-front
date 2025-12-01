@@ -1,11 +1,11 @@
 import { Input } from "@heroui/react";
 import { ErrorMessage } from "@/components/error/ErrorMessage";
 import type { UseFormRegister, FieldErrors } from "react-hook-form";
-import type { ProductForm } from "../../product.type";
+import type { ProductFormUserType } from "../../product.type";
 
 interface ProductNameFieldProps {
-    register: UseFormRegister<ProductForm>;
-    errors: FieldErrors<ProductForm>;
+    register: UseFormRegister<ProductFormUserType>;
+    errors: FieldErrors<ProductFormUserType>;
     isDisabled?: boolean;
 }
 

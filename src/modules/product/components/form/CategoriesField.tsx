@@ -1,6 +1,6 @@
 import { Select, SelectItem } from "@heroui/react";
 import { Controller, type Control } from "react-hook-form";
-import type { ProductForm } from "../../product.type";
+import type { ProductFormUserType } from "../../product.type";
 
 interface Category {
     id: number;
@@ -9,7 +9,7 @@ interface Category {
 }
 
 interface CategoriesFieldProps {
-    control: Control<ProductForm>;
+    control: Control<ProductFormUserType>;
     categories?: Category[];
     isLoading?: boolean;
     isDisabled?: boolean;

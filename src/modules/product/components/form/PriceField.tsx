@@ -3,22 +3,22 @@ import { ErrorMessage } from "@/components/error/ErrorMessage";
 import type { UseFormRegister, FieldErrors } from "react-hook-form";
 import type { ProductFormUserType } from "../../product.type";
 
-interface CapacityFieldProps {
+interface PriceFieldProps {
     register: UseFormRegister<ProductFormUserType>;
     errors: FieldErrors<ProductFormUserType>;
     isDisabled?: boolean;
 }
 
-export const CapacityField = ({
+export const PriceField = ({
     register,
     errors,
     isDisabled = false,
-}: CapacityFieldProps) => {
+}: PriceFieldProps) => {
     return (
         <div className="flex flex-col gap-2">
             <Input
-                {...register("capacity", { min: 1 })}
-                label="Capacidad"
+                {...register("price", { min: 1 })}
+                label="Precio"
                 type="number"
                 isDisabled={isDisabled}
                 radius="sm"

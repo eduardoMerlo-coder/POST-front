@@ -1,6 +1,6 @@
 import { axiosPrivate } from "@/lib/axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { BrandItem, Product, ProductForm } from "../product.type";
+import type { BrandItem, Product, ProductForm, ProductFormUserType } from "../product.type";
 import type { UomItem, PackagingTypeItem, CategoryItem } from "../product.type";
 
 export const useApiQuery = <T>(key: string, url: string) => {
@@ -48,6 +48,13 @@ export const useCreateProduct = () => {
   return useMutation({
     mutationFn: (data: ProductForm) =>
       axiosPrivate.post("/product-base", { ...data }),
+  });
+};
+
+export const useCreateProductVariant = () => {
+  return useMutation({
+    mutationFn: (data: ProductFormUserType) =>
+      axiosPrivate.post("/product-variant", { ...data }),
   });
 };
 

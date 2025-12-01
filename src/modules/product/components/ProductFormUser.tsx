@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import type { ProductForm as ProductFormType, ProductFormUserType } from "../product.type";
+import type { ProductFormUserType } from "../product.type";
 import { ProductNameField } from "./form/ProductNameField";
 import { InternalCodeField } from "./form/InternalCodeField";
 import { BarcodeField } from "./form/BarcodeField";
@@ -19,15 +19,19 @@ import {
     useGetAllUom,
     useGetBrands,
 } from "../hooks/useProduct";
+import { QuantityPerPkgField } from "./form/QuantityPerPkgField";
+import { StockQuantityField } from "./form/StockQuantityField";
+import { MinStockField } from "./form/MinStockField";
+import { PriceField } from "./form/PriceField";
 
 interface ProductFormProps {
-    initialData?: Partial<ProductFormType>;
-    onSubmit: (data: ProductFormType, reset: () => void) => void;
+    initialData?: Partial<ProductFormUserType>;
+    onSubmit: (data: ProductFormUserType, reset: () => void) => void;
     isPending: boolean;
     isEditMode?: boolean;
 }
 
-export const ProductFormAdmin = ({
+export const ProductFormUser = ({
     initialData,
     onSubmit,
     isPending,
@@ -55,6 +59,10 @@ export const ProductFormAdmin = ({
         categories: [],
         business_types: [],
         price: 0,
+        quantity_per_package: 1,
+        status: "active",
+        stock_quantity: 0,
+        min_stock: 1,
     };
 
     // Form management
@@ -66,7 +74,7 @@ export const ProductFormAdmin = ({
         control,
         reset,
         formState: { errors },
-    } = useForm<ProductFormType>({
+    } = useForm<ProductFormUserType>({
         defaultValues,
         mode: "onSubmit",
     });
@@ -175,14 +183,35 @@ export const ProductFormAdmin = ({
                         isLoading={loadingCategories}
                         isDisabled={isPending}
                     />
+                    <QuantityPerPkgField
+                        register={register}
+                        errors={errors}
+                        isDisabled={isPending}
+                    />
+                    <PriceField
+                        register={register}
+                        errors={errors}
+                        isDisabled={isPending}
+                    />
+                    <StockQuantityField
+                        register={register}
+                        errors={errors}
+                        isDisabled={isPending}
+                    />
+                    <MinStockField
+                        register={register}
+                        errors={errors}
+                        isDisabled={isPending}
+                    />
                 </div>
 
                 <div className="flex gap-4 justify-end">
-                    <Button type="submit" disabled={isPending} className="bg-accent font-semibold">
+                    <Button type="submit" radius="sm" disabled={isPending} className="bg-accent font-semibold">
                         {isEditMode ? "Actualizar" : "Guardar"}
                     </Button>
                     <Button
                         type="button"
+                        radius="sm"
                         disabled={isPending}
                         onPress={handleCancel}
                         className="bg-surface-alt font-semibold"

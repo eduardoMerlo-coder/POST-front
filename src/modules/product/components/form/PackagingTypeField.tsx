@@ -1,7 +1,7 @@
 import { Select, SelectItem } from "@heroui/react";
 import { Controller, type Control, type FieldErrors } from "react-hook-form";
 import { ErrorMessage } from "@/components/error/ErrorMessage";
-import type { ProductForm } from "../../product.type";
+import type { ProductFormUserType } from "../../product.type";
 
 interface PackagingType {
     id: number;
@@ -10,8 +10,8 @@ interface PackagingType {
 }
 
 interface PackagingTypeFieldProps {
-    control: Control<ProductForm>;
-    errors: FieldErrors<ProductForm>;
+    control: Control<ProductFormUserType>;
+    errors: FieldErrors<ProductFormUserType>;
     packagingList?: PackagingType[];
     isLoading?: boolean;
     isDisabled?: boolean;

@@ -11,7 +11,7 @@ export type ActionType =
   | { type: typeof ActionEnum.Logout };
 
 export interface AuthState {
-  accessToken: string | null;
+  user_id: string | null;
   user: string | null;
   role: string | null;
 }
