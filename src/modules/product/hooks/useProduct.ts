@@ -4,7 +4,8 @@ import type {
   BrandItem,
   Product,
   ProductForm,
-  ProductFormUserType,
+  ProductBaseForm,
+  ProductVariantForm,
   BaseProduct,
   ProductVariant,
 } from "../product.type";
@@ -54,16 +55,45 @@ export const useGetAllBaseProducts = (
   });
 };
 
-export const useCreateProduct = () => {
+export const useGetUserProducts = (
+  page: number,
+  per_page: number,
+  searchTerm: string,
+  user_id: string | null
+) => {
+  return useQuery({
+    queryKey: ["user-products", page, per_page, searchTerm, user_id],
+    queryFn: async () => {
+      const res = await axiosPrivate.get<{
+        products: Product[];
+        total: number;
+      }>("/user-products", {
+        params: {
+          page,
+          per_page,
+          searchTerm,
+          sort: "name",
+          order: "asc",
+          user_id: user_id || undefined,
+        },
+      });
+      return res.data;
+    },
+    enabled: !!user_id,
+    initialData: { products: [], total: 0 },
+  });
+};
+
+export const useCreateProductBase = () => {
   return useMutation({
-    mutationFn: (data: ProductForm) =>
+    mutationFn: (data: ProductBaseForm) =>
       axiosPrivate.post("/product-base", { ...data }),
   });
 };
 
 export const useCreateProductVariant = () => {
   return useMutation({
-    mutationFn: (data: ProductFormUserType) =>
+    mutationFn: (data: ProductVariantForm) =>
       axiosPrivate.post("/product-variant", { ...data }),
   });
 };
@@ -71,8 +101,8 @@ export const useCreateProductVariant = () => {
 export const useCreateUserProductVariant = () => {
   return useMutation({
     mutationFn: (data: {
+      product_base_id: number;
       variant_id: number;
-      barcode?: string;
       price: number;
       stock_quantity: number;
       min_stock: number;

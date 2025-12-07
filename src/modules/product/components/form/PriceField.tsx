@@ -16,20 +16,22 @@ export const PriceField = ({
 }: PriceFieldProps) => {
   return (
     <div className="flex flex-col gap-2">
+      <label className="text-sm font-medium text-primary">Precio *</label>
       <Input
         {...register("price", {
           required: "El precio es requerido",
           min: { value: 0.01, message: "El precio debe ser mayor a 0" },
           valueAsNumber: true,
         })}
-        label="Precio"
         type="number"
         step="0.01"
         isDisabled={isDisabled}
         radius="sm"
+        placeholder="0.00"
+        onFocus={(e) => e.target.select()}
         classNames={{
           inputWrapper:
-            "bg-surface border-1 border-border data-[hover=true]:bg-surface",
+            "bg-surface border-1 border-border data-[hover=true]:bg-surface !h-12",
         }}
         min={0}
       />

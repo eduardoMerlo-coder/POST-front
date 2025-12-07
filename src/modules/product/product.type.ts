@@ -13,10 +13,8 @@ export type Product = {
   name: string;
   price: string;
   capacity: number;
-  unit: {
-    name: string;
-  };
-  internal_code: string;
+  unit: string;
+  brand: string;
   barcode: string;
   status: ProductStatus;
 };
@@ -46,7 +44,6 @@ export interface BrandItemCreate {
 
 export interface ProductForm {
   name: string;
-  internal_code: string;
   barcode: string;
   brand_id: number;
   capacity: number;
@@ -56,12 +53,19 @@ export interface ProductForm {
   quantity_per_package: number;
 }
 
+export interface ProductBaseForm {
+  name: string;
+  brand_id: number;
+  categories: string[];
+}
+
 export interface ProductFormUserType extends ProductForm {
   stock_quantity: number;
   min_stock: number;
   status: ProductStatus;
   images: FileProps[];
   price: number;
+  presentation?: string; // Presentación del producto (unidad, pack, etc.)
 }
 
 // Tipos para el nuevo flujo de creación
@@ -85,6 +89,19 @@ export interface ProductVariant {
   capacity?: number;
   uom_id?: number;
   uom?: UomItem;
+}
+
+export interface ProductVariantForm {
+  product_base_id: number;
+  presentation: string;
+  capacity?: number;
+  unit_id: string;
+  quantity_per_package: number;
+  barcode?: string;
+  price: number;
+  stock_quantity: number;
+  min_stock: number;
+  user_id: string;
 }
 
 export type FormState =

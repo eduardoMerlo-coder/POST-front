@@ -16,19 +16,21 @@ export const StockQuantityField = ({
 }: StockQuantityFieldProps) => {
   return (
     <div className="flex flex-col gap-2">
+      <label className="text-sm font-medium text-primary">Stock *</label>
       <Input
         {...register("stock_quantity", {
           required: "El stock es requerido",
           min: { value: 0, message: "El stock no puede ser negativo" },
           valueAsNumber: true,
         })}
-        label="Stock"
         type="number"
         isDisabled={isDisabled}
         radius="sm"
+        placeholder="0"
+        onFocus={(e) => e.target.select()}
         classNames={{
           inputWrapper:
-            "bg-surface border-1 border-border data-[hover=true]:bg-surface",
+            "bg-surface border-1 border-border data-[hover=true]:bg-surface !h-12",
         }}
         min={0}
       />

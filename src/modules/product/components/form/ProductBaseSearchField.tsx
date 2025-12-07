@@ -10,6 +10,7 @@ interface ProductBaseSearchFieldProps {
   onCreateNew?: (searchTerm: string) => void;
   isDisabled?: boolean;
   selectedProductId?: number | null;
+  selectedProduct?: BaseProduct | null;
 }
 
 type SearchItem = BaseProduct | { id: string; name: string };
@@ -19,6 +20,7 @@ export const ProductBaseSearchField = ({
   onCreateNew,
   isDisabled = false,
   selectedProductId,
+  selectedProduct,
 }: ProductBaseSearchFieldProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [rawSearch, setRawSearch] = useState("");
@@ -55,14 +57,23 @@ export const ProductBaseSearchField = ({
   }, [products, searchTerm, onCreateNew]);
 
   useEffect(() => {
-    if (selectedProductId && products.length > 0) {
+    // Si hay un producto seleccionado pasado como prop, usarlo directamente
+    if (selectedProduct) {
+      setRawSearch(selectedProduct.name);
+      setSearchTerm(selectedProduct.name);
+    } else if (selectedProductId && products.length > 0) {
+      // Si solo tenemos el ID, buscar en la lista de productos
       const selected = products.find((p) => p.id === selectedProductId);
       if (selected) {
         setRawSearch(selected.name);
         setSearchTerm(selected.name);
       }
+    } else if (selectedProductId && !selectedProduct) {
+      // Si tenemos un ID pero no el producto completo y no hay productos en la lista,
+      // mantener el valor actual del rawSearch si existe
+      // Esto evita que se borre cuando cambiamos de paso
     }
-  }, [selectedProductId, products]);
+  }, [selectedProductId, selectedProduct, products]);
 
   const handleSelectionChange = useCallback(
     (key: Key | null) => {
@@ -92,10 +103,11 @@ export const ProductBaseSearchField = ({
 
   return (
     <div className="flex flex-col gap-2">
+      <label className="text-sm font-medium text-primary">
+        Buscar producto base
+      </label>
       <Autocomplete
-        label="Buscar producto base"
         placeholder="Ej: Pilsen, Coca Cola..."
-        labelPlacement="outside"
         isDisabled={isDisabled}
         isLoading={isLoading}
         items={filteredItems}
@@ -116,7 +128,7 @@ export const ProductBaseSearchField = ({
         }}
         allowsCustomValue={false}
         classNames={{
-          base: "[&_[data-slot=input-wrapper]]:bg-surface [&_[data-slot=input-wrapper]]:!h-12 [&_[data-slot=input-wrapper]]:border-1 [&_[data-slot=input-wrapper]]:border-border [&_[data-slot=input-wrapper]:hover]:bg-surface [&_[data-slot=label]]:text-sm [&_[data-slot=label]]:font-medium [&_[data-slot=label]]:mb-3",
+          base: "[&_[data-slot=input-wrapper]]:bg-surface [&_[data-slot=input-wrapper]]:!h-12 [&_[data-slot=input-wrapper]]:border-1 [&_[data-slot=input-wrapper]]:border-border [&_[data-slot=input-wrapper]:hover]:bg-surface",
           listboxWrapper: " bg-surface-alt rounded-lg",
           listbox: " bg-surface-alt  rounded-lg",
         }}

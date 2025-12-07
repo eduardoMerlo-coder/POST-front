@@ -4,38 +4,44 @@ import type {
   UseFormRegister,
   FieldErrors,
   UseFormSetValue,
+  UseFormWatch,
 } from "react-hook-form";
 import type { ProductFormUserType } from "../../product.type";
 
-interface ProductNameFieldProps {
+interface ProductPresentationFieldProps {
   register: UseFormRegister<ProductFormUserType>;
   errors: FieldErrors<ProductFormUserType>;
   isDisabled?: boolean;
   setValue?: UseFormSetValue<ProductFormUserType>;
+  watch?: UseFormWatch<ProductFormUserType>;
 }
 
-export const ProductNameField = ({
+export const ProductPresentationField = ({
   register,
   errors,
   isDisabled = false,
   setValue,
-}: ProductNameFieldProps) => {
+  watch,
+}: ProductPresentationFieldProps) => {
   const handleUnidadClick = () => {
     if (setValue) {
-      setValue("name", "unidad", { shouldValidate: true });
+      setValue("presentation", "unidad", { shouldValidate: true });
     }
   };
+
+  const presentationValue = watch ? watch("presentation") : undefined;
 
   return (
     <div className="flex flex-col gap-2">
       <label className="text-sm font-medium text-primary">
-        Nombre de producto *
+        Presentación del producto *
       </label>
       <Input
-        {...register("name", { required: "Este campo es requerido." })}
+        {...register("presentation", { required: "Este campo es requerido." })}
         radius="sm"
         isDisabled={isDisabled}
-        placeholder="Ingrese nombre del producto"
+        value={presentationValue || ""}
+        placeholder="Ej: unidad, pack, six-pack..."
         classNames={{
           inputWrapper:
             "bg-surface border-1 border-border data-[hover=true]:bg-surface !h-12",
@@ -51,7 +57,10 @@ export const ProductNameField = ({
           </button>
         }
       />
-      <ErrorMessage existError={!!errors.name} msg={errors.name?.message} />
+      <ErrorMessage
+        existError={!!errors.presentation}
+        msg={errors.presentation?.message}
+      />
     </div>
   );
 };

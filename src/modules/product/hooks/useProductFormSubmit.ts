@@ -21,10 +21,8 @@ export const useProductFormSubmit = ({
   reset,
 }: UseProductFormSubmitProps) => {
   const onSubmit = (data: ProductForm) => {
-    if (!data.barcode && !data.internal_code) {
-      return toast.error(
-        "Debe completar el campo codigo de barras o el codigo interno."
-      );
+    if (!data.barcode) {
+      return toast.error("Debe completar el campo código de barras.");
     }
 
     mutate(

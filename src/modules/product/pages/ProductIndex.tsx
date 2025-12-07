@@ -5,8 +5,7 @@ import {
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/setup/context/AuthContext";
-import { useGetAllBaseProducts } from "../hooks/useProduct";
+import { useGetUserProducts } from "../hooks/useProduct";
 import { useProductColumns } from "../hooks/useProductColumns";
 import {
   ProductTable,
@@ -17,9 +16,9 @@ import { DEFAULT_PAGE_SIZE } from "../constants/product.constants";
 import { debounce } from "lodash";
 
 export const ProductIndex = () => {
-  const { role } = useAuth();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const user_id = localStorage.getItem("user_id");
 
   const debouncedSetSearch = useMemo(
     () => debounce((value: string) => setSearchTerm(value), 400),
@@ -35,11 +34,12 @@ export const ProductIndex = () => {
     data: { products, total },
     isLoading,
     error,
-  } = useGetAllBaseProducts(pagination.pageIndex + 1, pagination.pageSize, searchTerm);
-
-  const handleViewProduct = (id: number) => {
-    navigate(`/product/${id}`);
-  };
+  } = useGetUserProducts(
+    pagination.pageIndex + 1,
+    pagination.pageSize,
+    searchTerm,
+    user_id
+  );
 
   const handleDeleteProduct = (id: number) => {
     // TODO: Implementar lógica de eliminación
@@ -55,8 +55,6 @@ export const ProductIndex = () => {
   };
 
   const columns = useProductColumns({
-    role: role || "user",
-    onView: handleViewProduct,
     onDelete: handleDeleteProduct,
   });
 
@@ -81,8 +79,7 @@ export const ProductIndex = () => {
 
       <ProductTable table={table} isLoading={isLoading} error={error} />
 
-      <ProductTablePagination table={table} />
+      <ProductTablePagination table={table} total={total} />
     </div>
   );
 };
-

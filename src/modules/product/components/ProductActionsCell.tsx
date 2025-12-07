@@ -1,49 +1,47 @@
 import { Button } from "@heroui/react";
+import { FaEdit, FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 interface ProductActionsCellProps {
-    productId: number;
-    onView: (id: number) => void;
-    onDelete?: (id: number) => void;
+  productId: number;
+  onDelete?: (id: number) => void;
 }
 
 export const ProductActionsCell = ({
-    productId,
-    onView,
-    onDelete,
+  productId,
+  onDelete,
 }: ProductActionsCellProps) => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const handleEdit = () => {
-        navigate(`/product/${productId}`);
-    };
+  const handleEdit = () => {
+    navigate(`/product/${productId}`);
+  };
 
-    const handleDelete = () => {
-        if (onDelete) {
-            onDelete(productId);
-        }
-    };
+  const handleDelete = () => {
+    if (onDelete) {
+      onDelete(productId);
+    }
+  };
 
-    return (
-        <div className="flex gap-2">
-            <Button
-                size="sm"
-                color="primary"
-                variant="flat"
-                onPress={handleEdit}
-            >
-                Editar
-            </Button>
-            {onDelete && (
-                <Button
-                    size="sm"
-                    color="danger"
-                    variant="flat"
-                    onPress={handleDelete}
-                >
-                    Eliminar
-                </Button>
-            )}
-        </div>
-    );
+  return (
+    <div className="flex gap-2">
+      <Button
+        size="sm"
+        className="bg-transparent text-secondary font-semibold min-w-4 group size-8 p-0"
+        onPress={handleEdit}
+      >
+        <FaEdit className="w-5 h-5 group-hover:text-sky-500" />
+      </Button>
+      {onDelete && (
+        <Button
+          size="sm"
+          radius="sm"
+          className="bg-transparent text-secondary font-semibold min-w-4 group size-8 p-0"
+          onPress={handleDelete}
+        >
+          <FaTrash className="w-5 h-5 group-hover:text-red-500" />
+        </Button>
+      )}
+    </div>
+  );
 };

@@ -5,76 +5,82 @@ import { ProductActionsCell } from "../components/ProductActionsCell";
 import { COLUMN_MIN_SIZE } from "../constants/product.constants";
 
 interface UseProductColumnsProps {
-    role: string;
-    onView: (id: number) => void;
-    onDelete?: (id: number) => void;
+  onDelete?: (id: number) => void;
 }
 
-/**
- * Hook personalizado para definir las columnas de la tabla de productos
- * Las columnas se ajustan según el rol del usuario
- */
 export const useProductColumns = ({
-    role,
-    onView,
-    onDelete,
+  onDelete,
 }: UseProductColumnsProps): ColumnDef<Product, any>[] => {
-    return useMemo<ColumnDef<Product, any>[]>(
-        () => [
-            {
-                accessorKey: "name",
-                cell: (info) => info.getValue(),
-                header: () => <span>Nombre</span>,
-                minSize: COLUMN_MIN_SIZE,
-            },
-            // Columna de precio solo visible para admin
-            ...(role === "admin"
-                ? [
-                    {
-                        accessorKey: "price",
-                        cell: (info: any) => info.getValue(),
-                        header: () => <span>Precio</span>,
-                        minSize: COLUMN_MIN_SIZE,
-                    },
-                ]
-                : []),
-            {
-                accessorKey: "brand.name",
-                header: "Marca",
-                cell: (info) => info.getValue(),
-                minSize: COLUMN_MIN_SIZE,
-            },
-            {
-                accessorKey: "capacity_unit",
-                header: "Unidad de medida",
-                cell: (info) => <>{info.row.original.capacity} {info.row.original.unit.name}</>,
-                minSize: COLUMN_MIN_SIZE,
-            },
-            {
-                accessorKey: "internal_code",
-                header: () => "Código interno",
-                cell: (info) => info.getValue(),
-                minSize: COLUMN_MIN_SIZE,
-            },
-            {
-                accessorKey: "barcode",
-                header: () => "Código de barras",
-                cell: (info) => info.getValue(),
-                minSize: COLUMN_MIN_SIZE,
-            },
-            {
-                accessorKey: "actions",
-                header: () => "Acciones",
-                cell: (info) => (
-                    <ProductActionsCell
-                        productId={info.row.original.id}
-                        onView={onView}
-                        onDelete={onDelete}
-                    />
-                ),
-                minSize: COLUMN_MIN_SIZE,
-            },
-        ],
-        [role, onView, onDelete]
-    );
+  return useMemo<ColumnDef<Product, any>[]>(
+    () => [
+      {
+        accessorKey: "name",
+        cell: (info) => info.getValue(),
+        header: () => <span>Nombre</span>,
+        minSize: COLUMN_MIN_SIZE,
+      },
+      {
+        accessorKey: "brand",
+        header: "Marca",
+        cell: (info) => info.getValue(),
+        minSize: COLUMN_MIN_SIZE,
+      },
+      {
+        accessorKey: "capacity_unit",
+        header: "Capacidad",
+        cell: (info) => (
+          <span>
+            {info.row.original.capacity} {info.row.original.unit}
+          </span>
+        ),
+        minSize: COLUMN_MIN_SIZE,
+      },
+      {
+        accessorKey: "price",
+        cell: (info: any) => {
+          const price = parseFloat(info.getValue() || "0");
+          return <span>${price.toFixed(2)}</span>;
+        },
+        header: () => <span>Precio</span>,
+        minSize: COLUMN_MIN_SIZE,
+      },
+      {
+        accessorKey: "barcode",
+        header: () => "Código de barras",
+        cell: (info) => info.getValue(),
+        minSize: COLUMN_MIN_SIZE,
+      },
+      {
+        accessorKey: "status",
+        header: () => "Estado",
+        cell: (info) => {
+          const status = info.getValue() as string;
+          const isActive = status === "ACTIVE";
+          return (
+            <div className="flex items-center gap-2 ">
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  isActive ? "bg-green-500" : "bg-red-500"
+                }`}
+              />
+              <span className="capitalize">{status.toLowerCase()}</span>
+            </div>
+          );
+        },
+        minSize: COLUMN_MIN_SIZE,
+      },
+      {
+        accessorKey: "actions",
+        header: () => "Acciones",
+        cell: (info) => (
+          <ProductActionsCell
+            productId={info.row.original.id}
+            onDelete={onDelete}
+          />
+        ),
+        minSize: COLUMN_MIN_SIZE,
+      },
+    ],
+    [onDelete]
+  );
 };

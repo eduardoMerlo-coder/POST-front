@@ -16,18 +16,21 @@ export const CapacityField = ({
 }: CapacityFieldProps) => {
   return (
     <div className="flex flex-col gap-2">
+      <label className="text-sm font-medium text-primary">Capacidad *</label>
       <Input
         {...register("capacity", {
           min: { value: 0, message: "La capacidad no puede ser negativa" },
           valueAsNumber: true,
         })}
-        label="Capacidad"
         type="number"
+        step="any"
         isDisabled={isDisabled}
         radius="sm"
+        placeholder="0"
+        onFocus={(e) => e.target.select()}
         classNames={{
           inputWrapper:
-            "bg-surface border-1 border-border data-[hover=true]:bg-surface",
+            "bg-surface border-1 border-border data-[hover=true]:bg-surface !h-12",
         }}
         min={0}
       />

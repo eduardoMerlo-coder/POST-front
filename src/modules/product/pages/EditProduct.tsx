@@ -5,7 +5,7 @@ import type {
   ProductForm as ProductFormType,
   ProductFormUserType,
 } from "../product.type";
-import { ProductFormUser } from "../components/ProductFormUser";
+import { ProductForm } from "../components/ProductFormUser";
 
 export const EditProduct = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,10 +17,8 @@ export const EditProduct = () => {
   const { mutate: updateProduct, isPending } = useUpdateProduct();
 
   const handleSubmit = (data: ProductFormType) => {
-    if (!data.barcode && !data.internal_code) {
-      return toast.error(
-        "Debe completar el campo codigo de barras o el codigo interno."
-      );
+    if (!data.barcode) {
+      return toast.error("Debe completar el campo código de barras.");
     }
 
     const formattedData = {
@@ -65,7 +63,7 @@ export const EditProduct = () => {
   }
 
   return (
-    <ProductFormUser
+    <ProductForm
       initialData={productData.data as unknown as Partial<ProductFormUserType>}
       onSubmit={handleSubmit}
       isPending={isPending}

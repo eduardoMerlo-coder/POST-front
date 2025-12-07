@@ -45,8 +45,10 @@ export const VariantSelectorField = ({
 
   return (
     <div className="flex flex-col gap-2">
+      <label className="text-sm font-medium text-primary">
+        Seleccionar variante
+      </label>
       <Select
-        label="Seleccionar variante"
         placeholder="Selecciona una variante existente"
         selectedKeys={selectedVariantId ? [String(selectedVariantId)] : []}
         onSelectionChange={(keys) => {
@@ -65,7 +67,7 @@ export const VariantSelectorField = ({
         items={selectItems}
         classNames={{
           trigger:
-            "bg-surface border-1 border-border data-[hover=true]:bg-surface",
+            "bg-surface border-1 border-border data-[hover=true]:bg-surface !h-12",
         }}
       >
         {(item: SelectItemType) => (

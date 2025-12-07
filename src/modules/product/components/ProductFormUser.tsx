@@ -7,7 +7,7 @@ import type {
   FormState,
   BaseProduct,
   ProductVariant,
-  ProductForm,
+  ProductBaseForm,
   CategoryItem,
 } from "../product.type";
 import { ProductBaseSearchField } from "./form/ProductBaseSearchField";
@@ -19,17 +19,23 @@ import {
   useGetAllCategories,
   useGetAllUom,
   useGetVariantsByProductId,
-  useCreateProduct,
+  useCreateProductBase,
   useGetBrands,
   useCreateBrand,
 } from "../hooks/useProduct";
 import { BrandAutocompleteField } from "./form/BrandAutocompleteField";
 import { CategoriesField } from "./form/CategoriesField";
 import { toast } from "react-toastify";
+import { FaChevronLeft } from "react-icons/fa6";
+import { MdTipsAndUpdates } from "react-icons/md";
 
 interface ProductFormProps {
   initialData?: Partial<ProductFormUserType>;
-  onSubmit: (data: ProductFormUserType, reset: () => void) => void;
+  onSubmit: (
+    data: ProductFormUserType,
+    reset: () => void,
+    productBaseId?: number
+  ) => void;
   isPending: boolean;
   isEditMode?: boolean;
   onVariantSelected?: (variantId: number | null) => void;
@@ -42,7 +48,7 @@ const resetFormState = () => {
   };
 };
 
-export const ProductFormUser = ({
+export const ProductForm = ({
   initialData,
   onSubmit,
   isPending,
@@ -58,9 +64,6 @@ export const ProductFormUser = ({
   });
   const [selectedProductBase, setSelectedProductBase] =
     useState<BaseProduct | null>(null);
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(
-    null
-  );
 
   // Data fetching hooks
   const { data: uomList, isLoading: loadingUomList } = useGetAllUom();
@@ -69,7 +72,7 @@ export const ProductFormUser = ({
 
   // Mutations
   const { mutate: createProductBase, isPending: isCreatingProductBase } =
-    useCreateProduct();
+    useCreateProductBase();
   const { mutate: createBrand, isPending: isCreatingBrand } = useCreateBrand();
 
   // Cargar variantes cuando se selecciona un producto base
@@ -82,7 +85,6 @@ export const ProductFormUser = ({
   const defaultValues: ProductFormUserType = {
     images: [],
     name: "",
-    internal_code: "",
     barcode: "",
     brand_id: 0,
     capacity: 0,
@@ -94,6 +96,7 @@ export const ProductFormUser = ({
     status: "ACTIVE",
     stock_quantity: 0,
     min_stock: 1,
+    presentation: "",
   };
 
   // Form management
@@ -133,10 +136,7 @@ export const ProductFormUser = ({
       if (selectedProductBase.business_types) {
         setValue("business_types", selectedProductBase.business_types);
       }
-      // Sugerir nombre de variante basado en producto base
-      if (selectedProductBase.name && !watch("name")) {
-        setValue("name", selectedProductBase.name);
-      }
+      // No auto-completar el nombre de presentación, debe ser ingresado manualmente
     }
   }, [selectedProductBase, setValue, watch]);
 
@@ -146,7 +146,6 @@ export const ProductFormUser = ({
     if (!product) {
       setFormState({ step: "search", productBaseId: null });
       setSelectedProductBase(null);
-      setSelectedVariant(null);
       onVariantSelected?.(null);
       return;
     }
@@ -178,17 +177,10 @@ export const ProductFormUser = ({
 
   // Handler para crear producto base
   const handleCreateProductBaseSubmit = (data: ProductFormUserType) => {
-    const productBaseData: ProductForm = {
+    const productBaseData: ProductBaseForm = {
       name: data.name,
-      internal_code: data.internal_code || "",
-      barcode: data.barcode || "",
       brand_id: data.brand_id || 0,
-      capacity: data.capacity || 0,
-      unit_id: data.unit_id || "",
       categories: data.categories || [],
-      business_types:
-        data.business_types.length > 0 ? data.business_types : [1],
-      quantity_per_package: data.quantity_per_package || 1,
     };
 
     createProductBase(productBaseData, {
@@ -205,7 +197,6 @@ export const ProductFormUser = ({
                 return cat ? { id: cat.id, name: cat.name } : null;
               })
               .filter((cat): cat is CategoryItem => cat !== null) || [],
-          business_types: productBaseData.business_types,
         };
 
         toast.success("Producto base creado exitosamente");
@@ -216,9 +207,6 @@ export const ProductFormUser = ({
           variantId: null,
           showVariantForm: false,
         });
-        // Limpiar campos que no son de la variante
-        setValue("internal_code", "");
-        setValue("barcode", "");
       },
       onError: (error: any) => {
         const message =
@@ -272,7 +260,6 @@ export const ProductFormUser = ({
 
     const variant = variants.find((v: ProductVariant) => v.id === variantId);
     if (variant) {
-      setSelectedVariant(variant);
       setFormState({
         step: "variant-exists",
         productBaseId: formState.productBaseId!,
@@ -290,7 +277,6 @@ export const ProductFormUser = ({
 
   // Manejar creación de nueva variante
   const handleCreateNewVariant = () => {
-    setSelectedVariant(null);
     setFormState({
       step: "create-variant",
       productBaseId: formState.productBaseId!,
@@ -310,7 +296,6 @@ export const ProductFormUser = ({
         // Volver al paso de búsqueda
         setFormState({ step: "search", productBaseId: null });
         setSelectedProductBase(null);
-        setSelectedVariant(null);
         onVariantSelected?.(null);
         reset();
       } else {
@@ -323,7 +308,6 @@ export const ProductFormUser = ({
   const handleBack = () => {
     setFormState({ step: "search", productBaseId: null });
     setSelectedProductBase(null);
-    setSelectedVariant(null);
     onVariantSelected?.(null);
   };
 
@@ -338,27 +322,12 @@ export const ProductFormUser = ({
               onCreateNew={handleCreateNewProductBase}
               isDisabled={isPending}
               selectedProductId={selectedProductBase?.id}
+              selectedProduct={selectedProductBase}
             />
           </div>
-          {selectedProductBase && (
+          {selectedProductBase && loadingVariants && (
             <div className="text-center py-4">
-              {loadingVariants ? (
-                <p className="text-gray-600">Cargando variantes...</p>
-              ) : (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <p className="text-sm text-green-800">
-                    <span className="font-semibold">
-                      Producto seleccionado:
-                    </span>{" "}
-                    {selectedProductBase.name}
-                    {selectedProductBase.brand &&
-                      ` - ${selectedProductBase.brand.name}`}
-                  </p>
-                  <p className="text-xs text-green-600 mt-1">
-                    Continuando al siguiente paso...
-                  </p>
-                </div>
-              )}
+              <p className="text-gray-600">Cargando variantes...</p>
             </div>
           )}
         </div>
@@ -368,9 +337,10 @@ export const ProductFormUser = ({
     if (formState.step === "create-product-base") {
       return (
         <div className="space-y-6">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-sm text-blue-800">
-              <span className="font-semibold">Crear nuevo producto base:</span>{" "}
+          <div className="mt-4 px-4 py-3 rounded-lg bg-transparent border border-green-600 flex items-start gap-3">
+            <MdTipsAndUpdates className="size-5 text-green-600" />
+            <p className="text-sm text-primary">
+              <span className="font-semibold text-green-600">Nota:</span>{" "}
               Primero necesitas crear el producto base, luego podrás crear la
               variante.
             </p>
@@ -381,6 +351,7 @@ export const ProductFormUser = ({
               register={register}
               errors={errors}
               isDisabled={isPending || isCreatingProductBase}
+              setValue={setValue}
             />
 
             <BrandAutocompleteField
@@ -428,22 +399,24 @@ export const ProductFormUser = ({
     if (formState.step === "variant-exists") {
       return (
         <div className="space-y-6">
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <p className="text-sm text-green-800">
-              <span className="font-semibold">
-                Variante existente seleccionada.
-              </span>{" "}
-              Solo necesitas completar tus datos específicos (precio, stock,
-              etc.)
-            </p>
-          </div>
+          {/* Mostrar selector de variantes con la variante seleccionada */}
+          {variants.length > 0 && (
+            <div className="mb-6">
+              <VariantSelectorField
+                variants={variants}
+                selectedVariantId={formState.variantId}
+                onSelect={handleVariantSelect}
+                onCreateNew={handleCreateNewVariant}
+                isDisabled={isPending}
+                isLoading={loadingVariants}
+              />
+            </div>
+          )}
 
           <UserProductDataSection
             register={register}
             errors={errors}
             isDisabled={isPending}
-            variantName={selectedVariant?.name}
-            showVariantInfo={true}
           />
         </div>
       );
@@ -476,22 +449,6 @@ export const ProductFormUser = ({
             </div>
           )}
 
-        {/* Mostrar mensaje cuando no hay variantes y aún no se ha elegido crear nueva */}
-        {!loadingVariants &&
-          formState.step === "create-variant" &&
-          variants.length === 0 &&
-          formState.showVariantForm !== true && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-              <p className="text-sm text-yellow-800">
-                <span className="font-semibold">
-                  No hay variantes disponibles.
-                </span>{" "}
-                Puedes crear una nueva variante completando el formulario a
-                continuación.
-              </p>
-            </div>
-          )}
-
         {/* Mostrar formulario de nueva variante solo si:
             - No hay variantes disponibles, O
             - El usuario explícitamente eligió crear nueva variante */}
@@ -507,6 +464,8 @@ export const ProductFormUser = ({
                 isLoadingUom={loadingUomList}
                 isDisabled={isPending}
                 productBaseName={selectedProductBase?.name}
+                setValue={setValue}
+                watch={watch}
               />
 
               <UserProductDataSection
@@ -535,7 +494,7 @@ export const ProductFormUser = ({
             {isEditMode ? "Editar Producto" : "Nuevo Producto"}
           </h2>
           {formState.step !== "search" && (
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm text-secondary mt-1">
               Paso 2 de 2:{" "}
               {formState.step === "variant-exists"
                 ? "Datos del usuario"
@@ -548,25 +507,27 @@ export const ProductFormUser = ({
         {formState.step !== "search" && (
           <Button
             type="button"
-            variant="light"
             onPress={handleBack}
             isDisabled={isPending}
+            className="text-secondary hover:text-primary bg-transparent text-sm"
           >
-            ← Volver a búsqueda
+            <FaChevronLeft /> Volver a búsqueda
           </Button>
         )}
       </div>
 
+      {/* Mostrar select de producto base cuando hay un producto seleccionado y no estamos en el paso de búsqueda */}
       {selectedProductBase &&
         formState.step !== "search" &&
         formState.step !== "create-product-base" && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <p className="text-sm text-blue-800">
-              <span className="font-semibold">Producto base:</span>{" "}
-              {selectedProductBase.name}
-              {selectedProductBase.brand &&
-                ` - ${selectedProductBase.brand.name}`}
-            </p>
+          <div className="mb-6">
+            <ProductBaseSearchField
+              onSelect={handleProductBaseSelect}
+              onCreateNew={handleCreateNewProductBase}
+              isDisabled={isPending}
+              selectedProductId={selectedProductBase?.id}
+              selectedProduct={selectedProductBase}
+            />
           </div>
         )}
 
@@ -576,15 +537,29 @@ export const ProductFormUser = ({
             reset();
             setFormState(resetFormState());
             setSelectedProductBase(null);
-            setSelectedVariant(null);
             onVariantSelected?.(null);
           };
-          onSubmit(data, customReset);
+          onSubmit(
+            data,
+            customReset,
+            formState.productBaseId ?? selectedProductBase?.id ?? undefined
+          );
         })}
+        onKeyDown={(e) => {
+          // Prevenir el envío del formulario al presionar Enter
+          // Solo permitir envío mediante el botón "Guardar"
+          if (e.key === "Enter" && e.target instanceof HTMLInputElement) {
+            e.preventDefault();
+          }
+        }}
       >
         {renderStepContent()}
 
-        {formState.step !== "search" && (
+        {/* Mostrar botones solo cuando la variante está seleccionada o el formulario de variante está visible */}
+        {(formState.step === "variant-exists" ||
+          (formState.step === "create-variant" &&
+            !loadingVariants &&
+            (variants.length === 0 || formState.showVariantForm === true))) && (
           <div className="flex gap-4 justify-end mt-6">
             <Button
               type="submit"
