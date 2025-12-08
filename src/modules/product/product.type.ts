@@ -10,6 +10,7 @@ export type ProductStatus =
 
 export type Product = {
   id: number;
+  variant_id: number;
   name: string;
   price: string;
   capacity: number;

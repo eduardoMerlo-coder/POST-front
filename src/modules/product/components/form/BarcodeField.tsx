@@ -8,17 +8,17 @@ import type { ProductFormUserType } from "../../product.type";
 import { generateInternalBarcode } from "../../utils";
 
 interface BarcodeFieldProps {
-  register: UseFormRegister<ProductFormUserType>;
+    register: UseFormRegister<ProductFormUserType>;
   setValue?: UseFormSetValue<ProductFormUserType>;
   watch?: UseFormWatch<ProductFormUserType>;
-  isDisabled?: boolean;
+    isDisabled?: boolean;
 }
 
 export const BarcodeField = ({
-  register,
+    register,
   setValue,
   watch,
-  isDisabled = false,
+    isDisabled = false,
 }: BarcodeFieldProps) => {
   const handleGenerate = () => {
     if (setValue) {
@@ -30,23 +30,23 @@ export const BarcodeField = ({
 
   const barcodeValue = watch ? watch("barcode") : undefined;
 
-  return (
+    return (
     <div className="flex flex-col gap-2">
       <label className="text-sm font-medium text-primary">
         Codigo de barras *
       </label>
-      <Input
-        {...register("barcode")}
-        type="number"
-        isDisabled={isDisabled}
-        radius="sm"
+        <Input
+            {...register("barcode")}
+            type="number"
+            isDisabled={isDisabled}
+            radius="sm"
         placeholder="Ingrese código de barras"
         value={barcodeValue || ""}
         onFocus={(e) => e.target.select()}
-        classNames={{
+            classNames={{
           inputWrapper:
             "bg-surface border-1 border-border data-[hover=true]:bg-surface !h-12",
-        }}
+            }}
         endContent={
           <button
             type="button"
@@ -57,7 +57,7 @@ export const BarcodeField = ({
             Generar
           </button>
         }
-      />
+        />
     </div>
-  );
+    );
 };

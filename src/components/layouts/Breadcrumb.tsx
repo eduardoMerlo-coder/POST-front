@@ -9,11 +9,17 @@ const ROUTE_CONFIG: Record<string, string> = {
   "/product": "Productos",
   "/product/new-product": "Nuevo Producto",
   "/product/category": "Categorias",
+  "/sales": "Ventas",
+  "/sales/accounts-receivable": "Cuentas por cobrar",
 };
 
 // Rutas que deben omitir el nivel intermedio (no mostrar "Productos" en el medio)
 const FLAT_ROUTES: Record<string, { label: string; path: string }> = {
   "/product/category": { label: "Categorias", path: "/product/category" },
+  "/sales/accounts-receivable": {
+    label: "Cuentas por cobrar",
+    path: "/sales/accounts-receivable",
+  },
 };
 
 /**
@@ -46,6 +52,16 @@ const getRouteLabel = (
     // 3. Si es un ID numérico (ruta dinámica), es "Editar Producto"
     if (currentIndex === pathnames.length - 1 && /^\d+$/.test(secondSegment)) {
       return "Editar Producto";
+    }
+  }
+
+  // 2.1. Manejar rutas especiales dentro de /sales
+  if (pathnames[0] === "sales" && pathnames.length > 1) {
+    const secondSegment = pathnames[1];
+
+    // Si es "accounts-receivable", retornar "Cuentas por cobrar"
+    if (secondSegment === "accounts-receivable") {
+      return "Cuentas por cobrar";
     }
   }
 

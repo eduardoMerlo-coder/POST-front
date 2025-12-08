@@ -327,7 +327,7 @@ export const ProductForm = ({
           </div>
           {selectedProductBase && loadingVariants && (
             <div className="text-center py-4">
-              <p className="text-gray-600">Cargando variantes...</p>
+                <p className="text-gray-600">Cargando variantes...</p>
             </div>
           )}
         </div>
@@ -410,7 +410,7 @@ export const ProductForm = ({
                 isDisabled={isPending}
                 isLoading={loadingVariants}
               />
-            </div>
+          </div>
           )}
 
           <UserProductDataSection
@@ -437,17 +437,17 @@ export const ProductForm = ({
           formState.step === "create-variant" &&
           variants.length > 0 &&
           formState.showVariantForm !== true && (
-            <div className="mb-6">
-              <VariantSelectorField
-                variants={variants}
-                selectedVariantId={null}
-                onSelect={handleVariantSelect}
-                onCreateNew={handleCreateNewVariant}
-                isDisabled={isPending}
-                isLoading={loadingVariants}
-              />
-            </div>
-          )}
+          <div className="mb-6">
+            <VariantSelectorField
+              variants={variants}
+              selectedVariantId={null}
+              onSelect={handleVariantSelect}
+              onCreateNew={handleCreateNewVariant}
+              isDisabled={isPending}
+              isLoading={loadingVariants}
+            />
+          </div>
+        )}
 
         {/* Mostrar formulario de nueva variante solo si:
             - No hay variantes disponibles, O

@@ -3,6 +3,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import type { Product } from "../product.type";
 import { ProductActionsCell } from "../components/ProductActionsCell";
 import { COLUMN_MIN_SIZE } from "../constants/product.constants";
+import { EditablePriceCell } from "../components/EditablePriceCell";
 
 interface UseProductColumnsProps {
   onDelete?: (id: number) => void;
@@ -39,7 +40,9 @@ export const useProductColumns = ({
         accessorKey: "price",
         cell: (info: any) => {
           const price = parseFloat(info.getValue() || "0");
-          return <span>${price.toFixed(2)}</span>;
+          return (
+            <EditablePriceCell product={info.row.original} price={price} />
+          );
         },
         header: () => <span>Precio</span>,
         minSize: COLUMN_MIN_SIZE,

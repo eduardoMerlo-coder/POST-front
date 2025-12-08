@@ -123,6 +123,29 @@ export const useUpdateProduct = () => {
   });
 };
 
+export const useUpdateUserProductPrice = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      variant_id,
+      user_id,
+      price,
+    }: {
+      variant_id: number;
+      user_id: string;
+      price: number;
+    }) =>
+      axiosPrivate.put(`/user-product-variant/${variant_id}`, {
+        variant_id,
+        user_id,
+        price,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-products"] });
+    },
+  });
+};
+
 export const useCreateBrand = () => {
   const queryClient = useQueryClient();
   return useMutation({

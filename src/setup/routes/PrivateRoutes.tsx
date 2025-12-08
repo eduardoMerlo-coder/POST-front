@@ -5,6 +5,7 @@ import { ModalProvider } from "../context/ModalContext";
 import { PosPage } from "@/pages/PosPage";
 import { InventoryPage } from "@/pages/InventoryPage";
 import { ProductPage } from "@/pages/ProductPage";
+import { SalesPage } from "@/pages/SalesPage";
 
 export const PrivateRoutes = () => {
   return (
@@ -15,6 +16,7 @@ export const PrivateRoutes = () => {
           <Route path="pos" element={<PosPage />} />
           <Route path="inventory" element={<InventoryPage />} />
           <Route path="product/*" element={<ProductPage />} />
+          <Route path="sales/*" element={<SalesPage />} />
         </Route>
       </Routes>
     </ModalProvider>
