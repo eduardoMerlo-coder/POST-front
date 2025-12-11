@@ -9,19 +9,12 @@ interface ProductActionsCellProps {
 
 export const ProductActionsCell = ({
   productId,
-  onDelete,
 }: ProductActionsCellProps) => {
   const navigate = useNavigate();
 
   const handleEdit = () => {
     navigate(`/product/${productId}`);
   };
-
-  //const handleDelete = () => {
-  //  if (onDelete) {
-  //    onDelete(productId);
-  //  }
-  //};
 
   return (
     <div className="flex gap-2">

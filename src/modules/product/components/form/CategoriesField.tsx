@@ -21,6 +21,9 @@ export const CategoriesField = ({
   isLoading = false,
   isDisabled = false,
 }: CategoriesFieldProps) => {
+  // Asegurar que categories siempre sea un array
+  const categoriesArray = Array.isArray(categories) ? categories : [];
+
   return (
     <div className="flex flex-col gap-2">
       <label className="text-sm font-medium text-primary">Categories</label>
@@ -37,7 +40,7 @@ export const CategoriesField = ({
           return (
             <Select
               key={`categories-select-${field.value?.join(",") || "empty"}-${
-                categories.length
+                categoriesArray.length
               }`}
               radius="sm"
               isDisabled={isLoading || isDisabled}
@@ -54,7 +57,7 @@ export const CategoriesField = ({
                   "bg-surface border-1 border-border data-[hover=true]:bg-surface !h-12",
               }}
             >
-              {categories.map((item) => (
+              {categoriesArray.map((item) => (
                 <SelectItem
                   key={item.id.toString()}
                   classNames={{ title: "flex gap-2" }}

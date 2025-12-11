@@ -43,6 +43,7 @@ export const ProductIndex = () => {
 
   const handleDeleteProduct = (id: number) => {
     // TODO: Implementar lógica de eliminación
+    console.log("id", id);
   };
 
   const handleNewProduct = () => {

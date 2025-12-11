@@ -46,7 +46,7 @@ export const VariantSelectorField = ({
   return (
     <div className="flex flex-col gap-2">
       <label className="text-sm font-medium text-primary">
-        Seleccionar variante
+        Seleccionar presentacion
       </label>
       <Select
         placeholder="Selecciona una variante existente"

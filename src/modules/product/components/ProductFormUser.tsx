@@ -82,7 +82,17 @@ export const ProductForm = ({
 
   // Data fetching hooks
   const { data: uomList, isLoading: loadingUomList } = useGetAllUom();
-  const { data: categories } = useGetAllCategories();
+  const { data: categoriesData } = useGetAllCategories();
+  // Asegurar que categories siempre sea un array, manejando diferentes estructuras de respuesta
+  const categories = (() => {
+    if (!categoriesData) return [];
+    if (Array.isArray(categoriesData)) return categoriesData;
+    // Si la respuesta tiene una estructura diferente (objeto con data o categories)
+    const data = categoriesData as any;
+    if (Array.isArray(data.data)) return data.data;
+    if (Array.isArray(data.categories)) return data.categories;
+    return [];
+  })();
   const { data: brands = [], isLoading: loadingBrands } = useGetBrands();
 
   // Mutations
@@ -175,8 +185,8 @@ export const ProductForm = ({
           categories:
             initialData.categories
               ?.map((catId) => {
-                const cat = categories?.find(
-                  (c) => String(c.id) === String(catId)
+                const cat = categories.find(
+                  (c: CategoryItem) => String(c.id) === String(catId)
                 );
                 return cat
                   ? { id: cat.id, name: cat.name, description: "" }
@@ -264,7 +274,7 @@ export const ProductForm = ({
           categories:
             data.categories
               ?.map((catId) => {
-                const cat = categories?.find((c) => String(c.id) === catId);
+                const cat = categories.find((c: CategoryItem) => String(c.id) === catId);
                 return cat ? { id: cat.id, name: cat.name } : null;
               })
               .filter((cat): cat is CategoryItem => cat !== null) || [],

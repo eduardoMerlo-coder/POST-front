@@ -2,7 +2,6 @@ import { ModuleLayout } from "@/components/layouts/ModuleLayout";
 import { MainPage } from "@/pages/HomePage";
 import { Route, Routes } from "react-router-dom";
 import { ModalProvider } from "../context/ModalContext";
-import { PosPage } from "@/pages/PosPage";
 import { InventoryPage } from "@/pages/InventoryPage";
 import { ProductPage } from "@/pages/ProductPage";
 import { SalesPage } from "@/pages/SalesPage";
@@ -13,7 +12,6 @@ export const PrivateRoutes = () => {
       <Routes>
         <Route element={<ModuleLayout />}>
           <Route index element={<MainPage />} />
-          <Route path="pos" element={<PosPage />} />
           <Route path="inventory" element={<InventoryPage />} />
           <Route path="product/*" element={<ProductPage />} />
           <Route path="sales/*" element={<SalesPage />} />

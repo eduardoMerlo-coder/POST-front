@@ -64,7 +64,6 @@ export const EditableBrandDescriptionCell = ({
         id: brand.id,
         data: {
           name: brand.name,
-          description: newDescription,
         },
       },
       {
