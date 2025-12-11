@@ -123,7 +123,6 @@ export const ProductBaseSearchField = ({
           }
         }}
         onSelectionChange={(key) => {
-          console.log("Autocomplete selection changed:", key);
           handleSelectionChange(key);
         }}
         allowsCustomValue={false}

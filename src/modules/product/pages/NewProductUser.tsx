@@ -76,7 +76,7 @@ export const NewProductUser = () => {
       presentation: data.presentation,
       capacity: data.capacity ? Number(data.capacity) : undefined,
       unit_id: data.unit_id,
-      quantity_per_package: Number(data.quantity_per_package) || 1,
+      units: Number(data.units) || 1,
       barcode: data.barcode || undefined,
       price: Number(data.price),
       stock_quantity: Number(data.stock_quantity),

@@ -75,7 +75,7 @@ export const VariantFormSection = ({
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium text-primary">Unidades *</label>
           <Input
-            {...register("quantity_per_package", {
+            {...register("units", {
               required: "Este campo es requerido.",
               min: { value: 1, message: "Debe ser al menos 1." },
               valueAsNumber: true,
@@ -92,8 +92,8 @@ export const VariantFormSection = ({
             min={1}
           />
           <ErrorMessage
-            existError={!!errors.quantity_per_package}
-            msg={errors.quantity_per_package?.message}
+            existError={!!errors.units}
+            msg={errors.units?.message}
           />
         </div>
 

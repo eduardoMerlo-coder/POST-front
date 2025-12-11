@@ -1,5 +1,5 @@
 import { Button } from "@heroui/react";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaEdit } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 interface ProductActionsCellProps {
@@ -17,11 +17,11 @@ export const ProductActionsCell = ({
     navigate(`/product/${productId}`);
   };
 
-  const handleDelete = () => {
-    if (onDelete) {
-      onDelete(productId);
-    }
-  };
+  //const handleDelete = () => {
+  //  if (onDelete) {
+  //    onDelete(productId);
+  //  }
+  //};
 
   return (
     <div className="flex gap-2">
@@ -32,7 +32,7 @@ export const ProductActionsCell = ({
       >
         <FaEdit className="w-5 h-5 group-hover:text-sky-500" />
       </Button>
-      {onDelete && (
+      {/*onDelete && (
         <Button
           size="sm"
           radius="sm"
@@ -41,7 +41,7 @@ export const ProductActionsCell = ({
         >
           <FaTrash className="w-5 h-5 group-hover:text-red-500" />
         </Button>
-      )}
+      )*/}
     </div>
   );
 };

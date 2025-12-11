@@ -11,6 +11,8 @@ export type ProductStatus =
 export type Product = {
   id: number;
   variant_id: number;
+  product_id: number;
+  user_product_variant_id: number;
   name: string;
   price: string;
   capacity: number;
@@ -51,7 +53,7 @@ export interface ProductForm {
   unit_id: string;
   categories: string[];
   business_types: number[];
-  quantity_per_package: number;
+  units: number;
 }
 
 export interface ProductBaseForm {
@@ -90,6 +92,7 @@ export interface ProductVariant {
   capacity?: number;
   uom_id?: number;
   uom?: UomItem;
+  user_product_variant_id: number;
 }
 
 export interface ProductVariantForm {
@@ -97,7 +100,7 @@ export interface ProductVariantForm {
   presentation: string;
   capacity?: number;
   unit_id: string;
-  quantity_per_package: number;
+  units: number;
   barcode?: string;
   price: number;
   stock_quantity: number;

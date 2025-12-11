@@ -20,7 +20,7 @@ export const QuantityPerPkgField = ({
         Cantidad por paquete *
       </label>
             <Input
-                {...register("quantity_per_package", { min: 1 })}
+                {...register("units", { min: 1 })}
                 type="number"
                 isDisabled={isDisabled}
                 radius="sm"
@@ -33,7 +33,7 @@ export const QuantityPerPkgField = ({
                 min={0}
             />
             <ErrorMessage
-                existError={!!errors.quantity_per_package}
+                existError={!!errors.units}
                 msg={"Cantidad por paquete debe ser al menos 1."}
             />
         </div>

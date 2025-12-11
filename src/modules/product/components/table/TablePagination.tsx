@@ -1,22 +1,23 @@
 import { Select, SelectItem } from "@heroui/react";
 import type { Table } from "@tanstack/react-table";
-import type { Product } from "../../product.type";
 import { PAGE_SIZE_OPTIONS } from "../../constants/product.constants";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 
-interface ProductTablePaginationProps {
-  table: Table<Product>;
+interface TablePaginationProps<T> {
+  table: Table<T>;
   total: number;
+  itemName?: string; // Nombre del ítem (ej: "productos", "categorías")
 }
 
 /**
- * Componente de paginación para la tabla de productos
+ * Componente de paginación genérico para tablas
  * Incluye navegación entre páginas y selector de tamaño de página
  */
-export const ProductTablePagination = ({
+export const TablePagination = <T,>({
   table,
   total,
-}: ProductTablePaginationProps) => {
+  itemName = "ítems",
+}: TablePaginationProps<T>) => {
   const { pagination } = table.getState();
   const pageCount = table.getPageCount();
   const currentPage = pagination.pageIndex + 1;
@@ -94,7 +95,7 @@ export const ProductTablePagination = ({
           ))}
         </Select>
         <span className="text-sm text-secondary">
-          Mostrando {startItem} - {endItem} de {total} productos
+          Mostrando {startItem} - {endItem} de {total} {itemName}
         </span>
       </div>
 

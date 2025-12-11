@@ -1,36 +1,41 @@
 import { flexRender, type Table } from "@tanstack/react-table";
-import type { Product } from "../../product.type";
 
-interface ProductTableProps {
-  table: Table<Product>;
+interface DataTableProps<T> {
+  table: Table<T>;
   isLoading?: boolean;
   error?: Error | null;
+  emptyMessage?: string;
+  loadingMessage?: string;
+  errorMessage?: string;
 }
 
 /**
- * Componente de tabla genérico para mostrar productos
- * Maneja estados de carga y error
+ * Componente de tabla genérico reutilizable
+ * Puede usarse para productos, categorías u otros datos
  */
-export const ProductTable = ({
+export const DataTable = <T,>({
   table,
   isLoading = false,
   error = null,
-}: ProductTableProps) => {
+  emptyMessage = "No hay datos disponibles",
+  loadingMessage = "Cargando...",
+  errorMessage = "Se produjo un error al cargar los datos",
+}: DataTableProps<T>) => {
   if (error) {
     return (
-      <div className="w-full p-4 text-center text-red-500">
-        Se produjo un error al cargar los productos
-      </div>
+      <div className="w-full p-4 text-center text-red-500">{errorMessage}</div>
     );
   }
 
   if (isLoading) {
     return (
       <div className="w-full p-4 text-center text-gray-500">
-        Cargando productos...
+        {loadingMessage}
       </div>
     );
   }
+
+  const columns = table.getAllColumns();
 
   return (
     <div className="w-full overflow-x-auto overflow-y-auto max-h-[calc(100vh-300px)]">
@@ -57,15 +62,26 @@ export const ProductTable = ({
           ))}
         </thead>
         <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr key={row.id} className="h-10 even:bg-base">
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="pl-2">
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
+          {table.getRowModel().rows.length === 0 ? (
+            <tr>
+              <td
+                colSpan={columns.length}
+                className="text-center py-8 text-secondary"
+              >
+                {emptyMessage}
+              </td>
             </tr>
-          ))}
+          ) : (
+            table.getRowModel().rows.map((row) => (
+              <tr key={row.id} className="h-10 even:bg-base">
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id} className="pl-2">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>

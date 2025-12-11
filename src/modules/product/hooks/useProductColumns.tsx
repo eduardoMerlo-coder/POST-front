@@ -77,7 +77,7 @@ export const useProductColumns = ({
         header: () => "Acciones",
         cell: (info) => (
           <ProductActionsCell
-            productId={info.row.original.id}
+            productId={info.row.original.user_product_variant_id}
             onDelete={onDelete}
           />
         ),

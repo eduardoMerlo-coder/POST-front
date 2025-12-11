@@ -63,13 +63,14 @@ export const Profile = () => {
         src={userProfile.avatar}
         alt={`${userProfile.name} avatar`}
       />
-      <div className="flex flex-col">
+      <div className="md:flex hidden flex-col">
         <h2 className="text-sm justify-center">{userProfile.name}</h2>
         <span className="text-[10px] font-semibold">{userProfile.role}</span>
       </div>
       <ChevronDownIcon
-        className={`size-3 ml-2 transition-transform duration-200 ${showOptions ? "rotate-180" : ""
-          }`}
+        className={`size-3 ml-2 transition-transform duration-200 ${
+          showOptions ? "rotate-180" : ""
+        }`}
       />
       {showOptions && <ProfileOptions onClose={handleClose} />}
     </div>

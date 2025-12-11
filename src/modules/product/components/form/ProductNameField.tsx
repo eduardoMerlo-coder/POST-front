@@ -12,6 +12,7 @@ interface ProductNameFieldProps {
   errors: FieldErrors<ProductFormUserType>;
   isDisabled?: boolean;
   setValue?: UseFormSetValue<ProductFormUserType>;
+  showEndButton?: boolean;
 }
 
 export const ProductNameField = ({
@@ -19,6 +20,7 @@ export const ProductNameField = ({
   errors,
   isDisabled = false,
   setValue,
+  showEndButton = false,
 }: ProductNameFieldProps) => {
   const handleUnidadClick = () => {
     if (setValue) {
@@ -41,14 +43,16 @@ export const ProductNameField = ({
             "bg-surface border-1 border-border data-[hover=true]:bg-surface !h-12",
         }}
         endContent={
-          <button
-            type="button"
-            onClick={handleUnidadClick}
-            disabled={isDisabled}
-            className="text-xs border-1 border-accent text-accent px-3 py-1 rounded-sm cursor-pointer font-medium hover:bg-accent hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            unidad
-          </button>
+          showEndButton && (
+            <button
+              type="button"
+              onClick={handleUnidadClick}
+              disabled={isDisabled}
+              className="text-xs border-1 border-accent text-accent px-3 py-1 rounded-sm cursor-pointer font-medium hover:bg-accent hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              unidad
+            </button>
+          )
         }
       />
       <ErrorMessage existError={!!errors.name} msg={errors.name?.message} />

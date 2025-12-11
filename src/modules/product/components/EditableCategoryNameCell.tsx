@@ -1,22 +1,23 @@
 import { useState, useRef, useEffect } from "react";
 import { FaCheck, FaTimes } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { useUpdateUserProductVariant } from "../hooks/useProduct";
-import type { Product } from "../product.type";
+import { useUpdateCategory } from "../hooks/useProduct";
+import type { CategoryItem } from "../product.type";
 
-interface EditablePriceCellProps {
-  product: Product;
-  price: number;
+interface EditableCategoryNameCellProps {
+  category: CategoryItem;
+  name: string;
 }
 
-export const EditablePriceCell = ({
-  product,
-  price,
-}: EditablePriceCellProps) => {
+export const EditableCategoryNameCell = ({
+  category,
+  name,
+}: EditableCategoryNameCellProps) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState(price.toFixed(2));
+  const [editValue, setEditValue] = useState(name);
   const inputRef = useRef<HTMLInputElement>(null);
-  const updatePriceMutation = useUpdateUserProductVariant();
+  const lastTapRef = useRef<number>(0);
+  const updateCategoryMutation = useUpdateCategory();
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -26,10 +27,8 @@ export const EditablePriceCell = ({
   }, [isEditing]);
 
   useEffect(() => {
-    setEditValue(price.toFixed(2));
-  }, [price]);
-
-  const lastTapRef = useRef<number>(0);
+    setEditValue(name);
+  }, [name]);
 
   const handleDoubleClick = () => {
     setIsEditing(true);
@@ -53,48 +52,40 @@ export const EditablePriceCell = ({
   };
 
   const handleSave = () => {
-    const newPrice = parseFloat(editValue);
-    const user_id = localStorage.getItem("user_id");
+    const newName = editValue.trim();
 
     // Validaciones
-    if (!user_id) {
-      toast.error("Usuario no autenticado");
-      setEditValue(price.toFixed(2));
+    if (!category.id) {
+      toast.error("Error: Categoría no encontrada");
+      setEditValue(name);
       setIsEditing(false);
       return;
     }
 
-    if (!product.variant_id) {
-      toast.error("Error: Variante no encontrada");
-      setEditValue(price.toFixed(2));
-      setIsEditing(false);
-      return;
-    }
-
-    // Permitir 0 como valor válido, solo validar que sea un número y no negativo
-    if (isNaN(newPrice) || newPrice < 0) {
-      toast.error("El precio debe ser un número válido mayor o igual a 0");
-      setEditValue(price.toFixed(2));
+    if (!newName || newName.length < 2) {
+      toast.error("El nombre debe tener al menos 2 caracteres");
+      setEditValue(name);
       setIsEditing(false);
       return;
     }
 
     // Solo actualizar si el valor cambió
-    if (newPrice === price) {
+    if (newName === name) {
       setIsEditing(false);
       return;
     }
 
-    updatePriceMutation.mutate(
+    updateCategoryMutation.mutate(
       {
-        user_product_variant_id: product.user_product_variant_id,
+        id: category.id,
         data: {
-          price: newPrice,
+          name: newName,
+          description: category.description || "",
         },
       },
       {
         onSuccess: () => {
-          toast.success("Precio actualizado exitosamente");
+          toast.success("Categoría actualizada exitosamente");
           setIsEditing(false);
         },
         onError: (error: any) => {
@@ -103,10 +94,10 @@ export const EditablePriceCell = ({
             error?.response?.data?.message ??
             error?.data?.data?.message ??
             error?.data?.message ??
-            "Error al actualizar el precio";
+            "Error al actualizar la categoría";
           toast.error(message);
           // Revertir al valor original en caso de error
-          setEditValue(price.toFixed(2));
+          setEditValue(name);
           setIsEditing(false);
         },
       }
@@ -114,7 +105,7 @@ export const EditablePriceCell = ({
   };
 
   const handleCancel = () => {
-    setEditValue(price.toFixed(2));
+    setEditValue(name);
     setIsEditing(false);
   };
 
@@ -129,24 +120,19 @@ export const EditablePriceCell = ({
   if (isEditing) {
     return (
       <div className="flex items-center gap-1">
-        <div className="relative flex items-center">
-          <span className="absolute left-2 text-secondary">$</span>
-          <input
-            ref={inputRef}
-            type="number"
-            step="0.01"
-            min="0"
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            onBlur={handleBlur}
-            onKeyDown={handleKeyDown}
-            className="w-24 pl-6 pr-2 py-1 text-xs border border-primary rounded focus:outline-none focus:ring-1 focus:ring-primary"
-            disabled={updatePriceMutation.isPending}
-          />
-        </div>
+        <input
+          ref={inputRef}
+          type="text"
+          value={editValue}
+          onChange={(e) => setEditValue(e.target.value)}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+          className="w-full px-2 py-1 text-xs border border-primary rounded focus:outline-none focus:ring-1 focus:ring-primary"
+          disabled={updateCategoryMutation.isPending}
+        />
         <button
           onClick={handleSave}
-          disabled={updatePriceMutation.isPending}
+          disabled={updateCategoryMutation.isPending}
           className="p-1 text-green-500 hover:text-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
           title="Guardar"
         >
@@ -154,7 +140,7 @@ export const EditablePriceCell = ({
         </button>
         <button
           onClick={handleCancel}
-          disabled={updatePriceMutation.isPending}
+          disabled={updateCategoryMutation.isPending}
           className="p-1 text-red-500 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
           title="Cancelar"
         >
@@ -171,7 +157,7 @@ export const EditablePriceCell = ({
       className="cursor-pointer hover:border-1 hover:border-primary px-2 py-1 rounded transition-colors touch-manipulation"
       title="Doble clic o doble tap para editar"
     >
-      ${price.toFixed(2)}
+      {name}
     </span>
   );
 };
