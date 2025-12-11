@@ -80,8 +80,8 @@ export const CategoryIndex = () => {
     () =>
       (categories || []).map((cat: CategoryItem) => ({
         ...cat,
-        name: cat.name,
-        description: cat.description || "",
+    name: cat.name,
+    description: cat.description || "",
       })),
     [categories]
   );

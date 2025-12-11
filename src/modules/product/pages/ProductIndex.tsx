@@ -3,7 +3,7 @@ import {
   useReactTable,
   type PaginationState,
 } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGetUserProducts } from "../hooks/useProduct";
 import { useProductColumns } from "../hooks/useProductColumns";
@@ -14,11 +14,18 @@ import {
 } from "../components/table";
 import { DEFAULT_PAGE_SIZE } from "../constants/product.constants";
 import { debounce } from "lodash";
+import { useAuth } from "@/setup/context/AuthContext";
 
 export const ProductIndex = () => {
   const navigate = useNavigate();
+  const { user_id } = useAuth();
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const user_id = localStorage.getItem("user_id");
+  const [mounted, setMounted] = useState(false);
+
+  // Esperar a que el componente esté montado y user_id esté disponible
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const debouncedSetSearch = useMemo(
     () => debounce((value: string) => setSearchTerm(value), 400),
@@ -38,7 +45,7 @@ export const ProductIndex = () => {
     pagination.pageIndex + 1,
     pagination.pageSize,
     searchTerm,
-    user_id
+    mounted && user_id ? user_id : null
   );
 
   const handleDeleteProduct = (id: number) => {

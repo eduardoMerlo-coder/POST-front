@@ -458,6 +458,58 @@ export const useGetBaseProductById = (id: number) => {
   });
 };
 
+export const useCheckUserProductExists = (
+  variantId: number | null,
+  userId: string | null,
+  enabled: boolean = false
+) => {
+  return useQuery({
+    queryKey: ["check-user-product", variantId, userId],
+    queryFn: async () => {
+      if (!variantId || !userId) {
+        return false;
+      }
+      try {
+        const res = await axiosPrivate.get<{ exists: boolean }>(
+          `/user-product-variant/check`,
+          {
+            params: {
+              variant_id: variantId,
+              user_id: userId,
+            },
+          }
+        );
+        return res.data.exists;
+      } catch {
+        // Si el endpoint no existe o falla, intentar otra forma
+        // Buscar en la lista de productos del usuario
+        try {
+          const res = await axiosPrivate.get<{
+            products: Product[];
+            total: number;
+          }>("/user-products", {
+            params: {
+              page: 1,
+              per_page: 1000,
+              searchTerm: "",
+              user_id: userId,
+            },
+          });
+          const exists =
+            res.data.products.some(
+              (p: Product) => p.variant_id === variantId
+            ) || false;
+          return exists;
+        } catch {
+          return false;
+        }
+      }
+    },
+    enabled: enabled && !!variantId && !!userId,
+    retry: false,
+  });
+};
+
 export const useSearchBaseProducts = (
   searchTerm: string,
   enabled: boolean = true
