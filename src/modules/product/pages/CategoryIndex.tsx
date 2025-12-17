@@ -58,6 +58,8 @@ export const CategoryIndex = () => {
     pageSize: DEFAULT_PAGE_SIZE,
   });
 
+  const user_id = localStorage.getItem("user_id");
+
   const debouncedSetSearch = useMemo(
     () => debounce((value: string) => setSearchTerm(value), 400),
     []
@@ -70,6 +72,7 @@ export const CategoryIndex = () => {
   } = useGetCategories(
     pagination.pageIndex + 1,
     pagination.pageSize,
+    user_id,
     searchTerm
   );
 
@@ -80,8 +83,8 @@ export const CategoryIndex = () => {
     () =>
       (categories || []).map((cat: CategoryItem) => ({
         ...cat,
-    name: cat.name,
-    description: cat.description || "",
+        name: cat.name,
+        description: cat.description || "",
       })),
     [categories]
   );

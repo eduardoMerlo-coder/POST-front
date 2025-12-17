@@ -3,43 +3,43 @@ import { debounce } from "lodash";
 import type { BrandItemCreate } from "../product.type";
 
 interface Brand {
-    id: number;
-    name: string;
+  id: number;
+  name: string;
 }
 
 export const useBrandSearch = (brands: Brand[]) => {
-    const [search, setSearch] = useState("");
-    const [rawSearch, setRawSearch] = useState("");
+  const [search, setSearch] = useState("");
+  const [rawSearch, setRawSearch] = useState("");
 
-    const debouncedSetSearch = useMemo(
-        () => debounce((value: string) => setSearch(value), 300),
-        []
+  const debouncedSetSearch = useMemo(
+    () => debounce((value: string) => setSearch(value), 300),
+    []
+  );
+
+  const filteredItems = useMemo(() => {
+    const brandsString = brands.map((b) => ({
+      ...b,
+      id: String(b.id),
+    }));
+
+    const filtered = brandsString.filter((b) =>
+      b.name.toLowerCase().includes(search.toLowerCase())
     );
 
-    const filteredItems = useMemo(() => {
-        const brandsString = brands.map((b) => ({
-            ...b,
-            id: String(b.id),
-        }));
+    const createOption: BrandItemCreate[] =
+      search.trim().length > 0
+        ? [{ id: "create", name: `Crear "${search}"` }]
+        : [];
 
-        const filtered = brandsString.filter((b) =>
-            b.name.toLowerCase().includes(search.toLowerCase())
-        );
+    return [...filtered, ...createOption];
+  }, [brands, search]);
 
-        const createOption: BrandItemCreate[] =
-            search.trim().length > 0
-                ? [{ id: "create", name: `Crear "${search}"` }]
-                : [];
-
-        return [...filtered, ...createOption];
-    }, [brands, search]);
-
-    return {
-        search,
-        rawSearch,
-        setSearch,
-        setRawSearch,
-        debouncedSetSearch,
-        filteredItems,
-    };
+  return {
+    search,
+    rawSearch,
+    setSearch,
+    setRawSearch,
+    debouncedSetSearch,
+    filteredItems,
+  };
 };

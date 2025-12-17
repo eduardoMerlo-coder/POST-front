@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { CustomAccordion } from "../ui/CustomAccordion";
 import { CustomRadioGroup } from "../ui/CustomRadioGroup";
-import { TagIcon, CartIcon } from "@/Icons";
+import { TagIcon } from "@/Icons";
 import { ThemeToggle } from "@/setup/theme";
 import { HiXMark } from "react-icons/hi2";
+import { FaCartArrowDown } from "react-icons/fa";
 
 interface SidePanelProps {
   isOpen?: boolean;
@@ -22,16 +23,16 @@ export const SidePanel = ({ isOpen = true, onClose }: SidePanelProps) => {
 
   return (
     <aside
-      className={`max-sm:fixed top-0 z-50 left-0 h-full w-[300px] min-w-[300px] bg-base-alt p-4 pr-0 relative transition-transform duration-300 ease-in-out ${
+      className={`max-lg:fixed top-0 z-50 left-0 h-full w-[300px] min-w-[300px] bg-base-alt p-4 pr-0 relative transition-transform duration-300 ease-in-out ${
         isOpen
-          ? "max-sm:translate-x-0"
-          : "max-sm:-translate-x-full max-sm:invisible"
+          ? "max-lg:translate-x-0"
+          : "max-lg:-translate-x-full max-sm:invisible"
       }`}
     >
       {onClose && (
         <button
           onClick={onClose}
-          className="absolute top-5 right-4 md:hidden text-primary hover:text-accent transition-colors"
+          className="absolute top-5 right-4 lg:hidden text-primary hover:text-accent transition-colors"
           aria-label="Close menu"
         >
           <HiXMark size={24} />
@@ -59,12 +60,16 @@ export const SidePanel = ({ isOpen = true, onClose }: SidePanelProps) => {
             ),
           },
           {
-            title: "VENTAS",
+            title: "Ventas",
             value: "sales",
-            startContent: <CartIcon />,
+            startContent: <FaCartArrowDown />,
             content: (
               <CustomRadioGroup
                 items={[
+                  {
+                    label: "Venta Touch",
+                    path: "/sales/venta-touch",
+                  },
                   {
                     label: "Cuentas por cobrar",
                     path: "/sales/accounts-receivable",

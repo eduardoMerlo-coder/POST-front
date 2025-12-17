@@ -14,6 +14,7 @@ export interface AuthState {
   user_id: string | null;
   user: string | null;
   role: string | null;
+  business_type_id: string | null;
 }
 
 export interface DispatchFunctionType {

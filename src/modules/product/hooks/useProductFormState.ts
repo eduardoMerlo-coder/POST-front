@@ -55,9 +55,11 @@ export const useProductFormState = ({
     number | null
   >(null);
 
+  const user_id = localStorage.getItem("user_id");
+
   // Data fetching hooks
   const { data: uomList, isLoading: loadingUomList } = useGetAllUom();
-  const { data: categoriesData } = useGetAllCategories();
+  const { data: categoriesData } = useGetAllCategories(user_id);
 
   // Asegurar que categories siempre sea un array, manejando diferentes estructuras de respuesta
   const categories = (() => {
@@ -69,7 +71,7 @@ export const useProductFormState = ({
     return [];
   })();
 
-  const { data: brands = [], isLoading: loadingBrands } = useGetBrands();
+  const { data: brands = [], isLoading: loadingBrands } = useGetBrands(user_id);
 
   // Mutations
   const { mutate: createProductBase, isPending: isCreatingProductBase } =
@@ -88,8 +90,6 @@ export const useProductFormState = ({
       selectedProductBase?.id ?? null,
       selectedProductBase !== null
     );
-
-  const user_id = localStorage.getItem("user_id");
 
   // Verificar si el producto ya existe cuando se selecciona una variante
   const { data: productExists, isLoading: checkingProductExists } =

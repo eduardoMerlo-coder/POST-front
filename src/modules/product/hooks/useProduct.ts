@@ -26,17 +26,38 @@ export const useApiQuery = <T>(key: string, url: string) => {
 
 export const useGetAllUom = () => useApiQuery<UomItem[]>("list-uom", "/uom");
 
-export const useGetAllCategories = () =>
-  useApiQuery<CategoryItem[]>("product-categories", "/category");
+export const useGetAllCategories = (user_id: string | null) => {
+  return useQuery({
+    queryKey: ["product-categories", user_id],
+    queryFn: async () => {
+      if (!user_id) {
+        throw new Error("user_id is required");
+      }
+      const res = await axiosPrivate.get<CategoryItem[]>("/category", {
+        params: {
+          user_id,
+        },
+      });
+      return res.data;
+    },
+    enabled: !!user_id,
+    staleTime: 60 * 60 * 24 * 1000, // 1 día en milisegundos
+    gcTime: 60 * 60 * 24 * 1000, // 1 día en milisegundos
+  });
+};
 
 export const useGetCategories = (
   page: number,
   per_page: number,
+  user_id: string | null,
   searchTerm?: string
 ) => {
   return useQuery({
-    queryKey: ["categories-paginated", page, per_page, searchTerm],
+    queryKey: ["categories-paginated", page, per_page, user_id, searchTerm],
     queryFn: async () => {
+      if (!user_id) {
+        throw new Error("user_id is required");
+      }
       try {
         // Intentar obtener con paginación
         const res = await axiosPrivate.get<{
@@ -46,6 +67,7 @@ export const useGetCategories = (
           total?: number;
         }>("/category", {
           params: {
+            user_id,
             page,
             per_page,
             searchTerm: searchTerm || undefined,
@@ -97,7 +119,11 @@ export const useGetCategories = (
               category?: CategoryItem[];
               data?: CategoryItem[];
             }
-        >("/category");
+        >("/category", {
+          params: {
+            user_id,
+          },
+        });
 
         let allCategories = Array.isArray(res.data)
           ? res.data
@@ -127,21 +153,43 @@ export const useGetCategories = (
         };
       }
     },
+    enabled: !!user_id,
     initialData: { categories: [], total: 0 },
   });
 };
 
-export const useGetBrands = () =>
-  useApiQuery<BrandItem[]>("product-brand", "/brand");
+export const useGetBrands = (user_id: string | null) => {
+  return useQuery({
+    queryKey: ["product-brand", user_id],
+    queryFn: async () => {
+      if (!user_id) {
+        throw new Error("user_id is required");
+      }
+      const res = await axiosPrivate.get<BrandItem[]>("/brand", {
+        params: {
+          user_id,
+        },
+      });
+      return res.data;
+    },
+    enabled: !!user_id,
+    staleTime: 60 * 60 * 24 * 1000, // 1 día en milisegundos
+    gcTime: 60 * 60 * 24 * 1000, // 1 día en milisegundos
+  });
+};
 
 export const useGetBrandsPaginated = (
   page: number,
   per_page: number,
+  user_id: string | null,
   searchTerm?: string
 ) => {
   return useQuery({
-    queryKey: ["brands-paginated", page, per_page, searchTerm],
+    queryKey: ["brands-paginated", page, per_page, user_id, searchTerm],
     queryFn: async () => {
+      if (!user_id) {
+        throw new Error("user_id is required");
+      }
       try {
         // Intentar obtener con paginación del servidor
         const res = await axiosPrivate.get<
@@ -154,6 +202,7 @@ export const useGetBrandsPaginated = (
           | BrandItem[]
         >("/brand", {
           params: {
+            user_id,
             page,
             per_page,
             searchTerm: searchTerm || undefined,
@@ -204,7 +253,11 @@ export const useGetBrandsPaginated = (
         };
       } catch {
         // Si falla la petición con parámetros, obtener todas las marcas
-        const res = await axiosPrivate.get<BrandItem[]>("/brand");
+        const res = await axiosPrivate.get<BrandItem[]>("/brand", {
+          params: {
+            user_id,
+          },
+        });
         let allBrands = Array.isArray(res.data) ? res.data : [];
 
         // Filtrar por searchTerm si existe (búsqueda del lado del cliente)
@@ -226,6 +279,7 @@ export const useGetBrandsPaginated = (
         };
       }
     },
+    enabled: !!user_id,
     initialData: { brands: [], total: 0 },
   });
 };
@@ -396,8 +450,13 @@ export const useUpdateUserProductVariant = () => {
 export const useCreateBrand = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: { name: string }) =>
-      axiosPrivate.post("/brand", { ...data }),
+    mutationFn: (data: { name: string; user_id?: string }) => {
+      const body: { name: string; user_id?: string } = { name: data.name };
+      if (data.user_id) {
+        body.user_id = data.user_id;
+      }
+      return axiosPrivate.post("/brand", body);
+    },
     onSuccess: () => {
       // Invalidar todas las queries relacionadas con marcas
       queryClient.invalidateQueries({ queryKey: ["product-brand"] });
@@ -422,8 +481,24 @@ export const useUpdateBrand = () => {
 export const useCreateCategory = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: { name: string; description: string }) =>
-      axiosPrivate.post("/category", { ...data }),
+    mutationFn: (data: {
+      name: string;
+      description: string;
+      user_id?: string;
+    }) => {
+      const body: {
+        name: string;
+        description: string;
+        user_id?: string;
+      } = {
+        name: data.name,
+        description: data.description,
+      };
+      if (data.user_id) {
+        body.user_id = data.user_id;
+      }
+      return axiosPrivate.post("/category", body);
+    },
     onSuccess: () => {
       // Invalidar todas las queries relacionadas con categorías
       queryClient.invalidateQueries({ queryKey: ["product-categories"] });

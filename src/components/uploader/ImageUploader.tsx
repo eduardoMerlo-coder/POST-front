@@ -10,7 +10,11 @@ export type FileProps = {
   url: string;
 };
 
-export const ImageUploader = ({ control }: { control: Control<ProductFormUserType> }) => {
+export const ImageUploader = ({
+  control,
+}: {
+  control: Control<ProductFormUserType>;
+}) => {
   const [uploading, setUploading] = useState(false);
   const { fields, remove, append } = useFieldArray<ProductFormUserType>({
     control,

@@ -41,6 +41,8 @@ export const BrandIndex = () => {
     pageSize: DEFAULT_PAGE_SIZE,
   });
 
+  const user_id = localStorage.getItem("user_id");
+
   const debouncedSetSearch = useMemo(
     () => debounce((value: string) => setSearchTerm(value), 400),
     []
@@ -53,6 +55,7 @@ export const BrandIndex = () => {
   } = useGetBrandsPaginated(
     pagination.pageIndex + 1,
     pagination.pageSize,
+    user_id,
     searchTerm
   );
 
