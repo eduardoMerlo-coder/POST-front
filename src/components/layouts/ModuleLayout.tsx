@@ -20,7 +20,7 @@ export const ModuleLayout = () => {
   };
 
   return (
-    <div className="relative h-full w-full bg-[#f7f7f7] flex">
+    <div className="relative h-full w-full bg-base flex">
       <SidePanel isOpen={isSidePanelOpen} onClose={closeSidePanel} />
       {isSidePanelOpen && (
         <div

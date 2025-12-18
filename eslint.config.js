@@ -28,6 +28,12 @@ export default tseslint.config([
       "@typescript-eslint/no-explicit-any": "off",
       "react-refresh/only-export-components": "off",
       "prettier/prettier": "warn",
+      "prettier/prettier": [
+        "error",
+        {
+          "endOfLine": "auto"
+        }
+      ],
       // Desactivar reglas de ESLint que conflictúan con Prettier
       ...prettierConfig.rules,
     },

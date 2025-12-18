@@ -8,6 +8,15 @@ export interface AccountReceivable {
   monto_debe_pagar: number;
 }
 
+export interface Client {
+  id: number | string;
+  dni: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  // Agregar más campos según la respuesta de la API
+}
+
 export interface SelectedProduct {
   id: number;
   variant_id: number;

@@ -35,7 +35,7 @@ export const PaymentModal = ({ totalAmount, onConfirm }: PaymentModalProps) => {
   const [paymentMethods, setPaymentMethods] = useState<Set<string>>(
     new Set(["CONTADO"])
   );
-  const [contadoAmount, setContadoAmount] = useState(roundedTotal);
+  const [contadoAmount, setContadoAmount] = useState(0);
   const [yapeAmount, setYapeAmount] = useState(0);
   const [transferenciaAmount, setTransferenciaAmount] = useState(0);
   const [clientName] = useState("CLIENTE GENÉRICO");
@@ -282,7 +282,7 @@ export const PaymentModal = ({ totalAmount, onConfirm }: PaymentModalProps) => {
                     readOnly
                     classNames={{
                       base: "w-full",
-                      inputWrapper: `!bg-[#828998] ${
+                      inputWrapper: `!bg-surface-alt ${
                         isPaymentInsufficient
                           ? "border-1 border-danger"
                           : "border-1 border-border"
@@ -307,7 +307,7 @@ export const PaymentModal = ({ totalAmount, onConfirm }: PaymentModalProps) => {
                     readOnly
                     classNames={{
                       base: "w-full",
-                      inputWrapper: "!bg-[#828998] border-1 border-border",
+                      inputWrapper: "!bg-surface-alt border-1 border-border",
                       input: "font-semibold",
                     }}
                   />

@@ -115,9 +115,10 @@ export const SelectedProductsPanel = ({
                         }}
                         classNames={{
                           base: "w-full",
-                          input: "text-sm text-center font-semibold",
+                          input:
+                            "text-sm text-center font-semibold text-primary",
                           inputWrapper:
-                            "h-8 bg-surface border-1 border-border hover:border-accent px-1",
+                            "h-8 bg-surface border-1 border-border hover:border-accent focus-within:border-accent transition-colors px-1",
                         }}
                         onFocus={(e) => e.target.select()}
                       />
@@ -161,9 +162,10 @@ export const SelectedProductsPanel = ({
                         }}
                         classNames={{
                           base: "w-full",
-                          input: "text-sm text-center font-semibold",
+                          input:
+                            "text-sm text-center font-semibold text-primary",
                           inputWrapper:
-                            "h-8 bg-surface border-1 border-border hover:border-accent px-1",
+                            "h-8 bg-surface border-1 border-border hover:border-accent focus-within:border-accent transition-colors px-1",
                         }}
                         onFocus={(e) => e.target.select()}
                       />

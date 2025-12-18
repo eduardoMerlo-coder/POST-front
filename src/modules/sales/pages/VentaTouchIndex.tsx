@@ -1,8 +1,5 @@
-import { useState, useMemo, useRef, useEffect } from "react";
-import {
-  useGetUserProducts,
-  useGetAllCategories,
-} from "@/modules/product/hooks/useProduct";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import { useGetUserProducts } from "@/modules/product/hooks/useProduct";
 import { useAuth } from "@/setup/context/AuthContext";
 import { useModal } from "@/setup/context/ModalContext";
 import type { Product } from "@/modules/product/product.type";
@@ -11,24 +8,25 @@ import { debounce } from "lodash";
 import { PaymentModal, type PaymentData } from "../components/PaymentModal";
 import { toast } from "react-toastify";
 import { axiosPrivate } from "@/lib/axios";
-import { CategoryBar } from "./venta-touch/components/CategoryBar";
 import { SearchBar } from "./venta-touch/components/SearchBar";
 import { ProductGrid } from "./venta-touch/components/ProductGrid";
 import { SelectedProductsPanel } from "./venta-touch/components/SelectedProductsPanel";
+import { ClientSearchBar } from "./venta-touch/components/ClientSearchBar";
 
 export const VentaTouchIndex = () => {
   const { user_id } = useAuth();
   const { setContent } = useModal();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
-    null
-  );
+  // TODO: Usar cuando se implemente filtrado por categoría
+  // const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>(
     []
   );
-  const categoriesScrollRef = useRef<HTMLDivElement>(null);
+  // TODO: Usar cuando se implemente el scroll de categorías
+  // const categoriesScrollRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const [showScrollIndicator, setShowScrollIndicator] = useState(false);
+  // TODO: Usar cuando se implemente el indicador de scroll
+  // const [showScrollIndicator, setShowScrollIndicator] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchInputValue, setSearchInputValue] = useState("");
 
@@ -48,15 +46,16 @@ export const VentaTouchIndex = () => {
   );
 
   // Obtener categorías
-  const { data: categoriesData } = useGetAllCategories(user_id || null);
-  const categories = useMemo(() => {
-    if (!categoriesData) return [];
-    if (Array.isArray(categoriesData)) return categoriesData;
-    const data = categoriesData as any;
-    if (Array.isArray(data.data)) return data.data;
-    if (Array.isArray(data.categories)) return data.categories;
-    return [];
-  }, [categoriesData]);
+  // TODO: Usar cuando se implemente el filtrado por categoría
+  // const { data: categoriesData } = useGetAllCategories(user_id || null);
+  // const categories = useMemo(() => {
+  //   if (!categoriesData) return [];
+  //   if (Array.isArray(categoriesData)) return categoriesData;
+  //   const data = categoriesData as any;
+  //   if (Array.isArray(data.data)) return data.data;
+  //   if (Array.isArray(data.categories)) return data.categories;
+  //   return [];
+  // }, [categoriesData]);
 
   // Obtener productos disponibles
   const {
@@ -65,21 +64,22 @@ export const VentaTouchIndex = () => {
   } = useGetUserProducts(1, 100, searchTerm, user_id || null);
 
   // Verificar si hay scroll en las categorías (solo desktop)
-  useEffect(() => {
-    const checkScroll = () => {
-      if (categoriesScrollRef.current) {
-        const { scrollWidth, clientWidth, scrollLeft } =
-          categoriesScrollRef.current;
-        // Mostrar indicador si hay más contenido a la derecha
-        setShowScrollIndicator(scrollLeft + clientWidth < scrollWidth - 10);
-      }
-    };
-
-    // Verificar después de que el DOM se actualice
-    setTimeout(checkScroll, 0);
-    window.addEventListener("resize", checkScroll);
-    return () => window.removeEventListener("resize", checkScroll);
-  }, [categories]);
+  // TODO: Reactivar cuando se implemente el indicador de scroll
+  // useEffect(() => {
+  //   const checkScroll = () => {
+  //     if (categoriesScrollRef.current) {
+  //       const { scrollWidth, clientWidth, scrollLeft } =
+  //         categoriesScrollRef.current;
+  //       // Mostrar indicador si hay más contenido a la derecha
+  //       setShowScrollIndicator(scrollLeft + clientWidth < scrollWidth - 10);
+  //     }
+  //   };
+  //
+  //   // Verificar después de que el DOM se actualice
+  //   setTimeout(checkScroll, 0);
+  //   window.addEventListener("resize", checkScroll);
+  //   return () => window.removeEventListener("resize", checkScroll);
+  // }, [categories]);
 
   // Obtener productos disponibles (incluir todos, incluso los seleccionados para mostrar controles)
   const availableProducts = useMemo(() => {
@@ -89,10 +89,13 @@ export const VentaTouchIndex = () => {
   }, [products]);
 
   // Función auxiliar para obtener la cantidad seleccionada de un producto
-  const getSelectedQuantity = (variantId: number): number => {
-    const selected = selectedProducts.find((p) => p.variant_id === variantId);
-    return selected ? selected.quantity : 0;
-  };
+  const getSelectedQuantity = useCallback(
+    (variantId: number): number => {
+      const selected = selectedProducts.find((p) => p.variant_id === variantId);
+      return selected ? selected.quantity : 0;
+    },
+    [selectedProducts]
+  );
 
   // Agregar producto a la lista de seleccionados
   const handleAddProduct = useMemo(() => {
@@ -284,28 +287,6 @@ export const VentaTouchIndex = () => {
     };
   }, [processScannedBarcode]);
 
-  // Actualizar cantidad de un producto (permite decimales)
-  const handleUpdateQuantity = (
-    variantId: number,
-    newQuantity: number,
-    allowZero: boolean = false
-  ) => {
-    // Permitir 0 temporalmente mientras el usuario está escribiendo (ej: "0.5")
-    if (newQuantity < 0) {
-      return; // No permitir valores negativos
-    }
-    if (newQuantity === 0 && !allowZero) {
-      // Solo eliminar si no estamos permitiendo 0 temporalmente
-      handleRemoveProduct(variantId);
-      return;
-    }
-    setSelectedProducts(
-      selectedProducts.map((p) =>
-        p.variant_id === variantId ? { ...p, quantity: newQuantity } : p
-      )
-    );
-  };
-
   // Actualizar precio de un producto
   const handleUpdatePrice = (variantId: number, newPrice: number) => {
     if (newPrice < 0) return;
@@ -317,11 +298,32 @@ export const VentaTouchIndex = () => {
   };
 
   // Remover producto de la lista
-  const handleRemoveProduct = (variantId: number) => {
-    setSelectedProducts(
-      selectedProducts.filter((p) => p.variant_id !== variantId)
+  const handleRemoveProduct = useCallback((variantId: number) => {
+    setSelectedProducts((prev) =>
+      prev.filter((p) => p.variant_id !== variantId)
     );
-  };
+  }, []);
+
+  // Actualizar cantidad de un producto (permite decimales)
+  const handleUpdateQuantity = useCallback(
+    (variantId: number, newQuantity: number, allowZero: boolean = false) => {
+      // Permitir 0 temporalmente mientras el usuario está escribiendo (ej: "0.5")
+      if (newQuantity < 0) {
+        return; // No permitir valores negativos
+      }
+      if (newQuantity === 0 && !allowZero) {
+        // Solo eliminar si no estamos permitiendo 0 temporalmente
+        handleRemoveProduct(variantId);
+        return;
+      }
+      setSelectedProducts((prev) =>
+        prev.map((p) =>
+          p.variant_id === variantId ? { ...p, quantity: newQuantity } : p
+        )
+      );
+    },
+    [handleRemoveProduct]
+  );
 
   // Función para redondear hacia arriba a 1 decimal
   const roundUpToOneDecimal = (value: number): number => {
@@ -345,7 +347,7 @@ export const VentaTouchIndex = () => {
   }, [selectedProducts]);
 
   // Abrir modal de pago
-  const handleOpenPaymentModal = () => {
+  const handleOpenPaymentModal = useCallback(() => {
     const roundedTotal = roundUpToOneDecimal(totalAmount);
     setContent?.(
       <PaymentModal
@@ -357,21 +359,30 @@ export const VentaTouchIndex = () => {
         }}
       />
     );
-  };
+  }, [totalAmount, setContent]);
+
+  // Callbacks para ClientSearchBar (memoizados para evitar re-renders)
+  const handleClientTypeChange = useCallback((type: "B" | "F" | "NVT") => {
+    // TODO: Implementar lógica cuando cambie el tipo de cliente
+    console.log("Tipo de cliente seleccionado:", type);
+  }, []);
+
+  const handleClientSearch = useCallback((value: string) => {
+    // TODO: Implementar búsqueda de clientes
+    console.log("Buscando cliente:", value);
+  }, []);
+
+  const handleIncognitoClick = useCallback(() => {
+    // TODO: Implementar acción de incógnito
+    console.log("Modo incógnito activado");
+  }, []);
 
   return (
-    <div className="flex flex-col gap-4 h-full min-h-0 max-h-full overflow-hidden relative  ">
-      <CategoryBar
-        categories={categories}
-        selectedCategoryId={selectedCategoryId}
-        onSelectCategory={setSelectedCategoryId}
-        categoriesScrollRef={categoriesScrollRef}
-        showScrollIndicator={showScrollIndicator}
-        onScroll={(e) => {
-          const target = e.target as HTMLDivElement;
-          const { scrollWidth, clientWidth, scrollLeft } = target;
-          setShowScrollIndicator(scrollLeft + clientWidth < scrollWidth - 10);
-        }}
+    <div className="flex flex-col gap-4 h-full min-h-0 max-h-full overflow-hidden relative">
+      <ClientSearchBar
+        onClientTypeChange={handleClientTypeChange}
+        onSearch={handleClientSearch}
+        onIncognitoClick={handleIncognitoClick}
       />
 
       <div className="flex gap-4 flex-1 min-h-0 overflow-hidden">
@@ -397,9 +408,7 @@ export const VentaTouchIndex = () => {
             products={availableProducts}
             getSelectedQuantity={getSelectedQuantity}
             onAddProduct={handleAddProduct}
-            onDecrement={(variantId, nextQuantity) =>
-              handleUpdateQuantity(variantId, nextQuantity)
-            }
+            onDecrement={handleUpdateQuantity}
           />
         </div>
 

@@ -23,9 +23,9 @@ export const SearchBar = ({
         startContent={<HiMagnifyingGlass className="text-secondary" />}
         classNames={{
           base: "w-full",
-          input: "text-sm",
+          input: "text-sm text-primary",
           inputWrapper:
-            "bg-surface border-1 border-border hover:border-border data-[hover=true]:border-border",
+            "bg-surface border-1 border-border hover:border-accent focus-within:border-accent transition-colors",
         }}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={(e) => {
