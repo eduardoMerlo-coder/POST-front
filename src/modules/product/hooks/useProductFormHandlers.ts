@@ -206,8 +206,9 @@ export const useProductFormHandlers = ({
     onSuccess: (id: number, name: string) => void
   ) => {
     if (isCreatingBrand) return;
+    const user_id = localStorage.getItem("user_id");
     createBrand(
-      { name },
+      { name, user_id: user_id || undefined },
       {
         onSuccess: ({ data }: any) => {
           toast.success("Marca creada exitosamente.");
@@ -490,9 +491,11 @@ export const useProductFormHandlers = ({
     formState.step,
     formState.productBaseId,
     variants,
+    setFormState,
     setValue,
     onVariantSelected,
     handleBack,
+    setSelectedVariantIdForCheck,
   ]);
 
   return {

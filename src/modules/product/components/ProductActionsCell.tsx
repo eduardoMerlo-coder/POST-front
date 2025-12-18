@@ -7,9 +7,7 @@ interface ProductActionsCellProps {
   onDelete?: (id: number) => void;
 }
 
-export const ProductActionsCell = ({
-  productId,
-}: ProductActionsCellProps) => {
+export const ProductActionsCell = ({ productId }: ProductActionsCellProps) => {
   const navigate = useNavigate();
 
   const handleEdit = () => {

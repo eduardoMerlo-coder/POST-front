@@ -24,10 +24,12 @@ export const CategoryForm = () => {
   });
 
   const onSubmit = (data: CategoryFormData) => {
+    const user_id = localStorage.getItem("user_id");
     createCategory(
       {
         name: data.name.trim(),
         description: data.description.trim(),
+        user_id: user_id || undefined,
       },
       {
         onSuccess: () => {

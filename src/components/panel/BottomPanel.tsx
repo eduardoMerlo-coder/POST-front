@@ -24,11 +24,11 @@ export const BottomPanel = () => {
     },
   ];
   return (
-    <footer className="fixed bottom-0 bg-white h-14 p-2 rounded-t-[8px] w-full flex items-center justify-around">
+    <footer className="fixed bottom-0 bg-surface h-14 p-2 rounded-t-[8px] w-full flex items-center justify-around">
       {footerItems.map((item) => (
         <div
-          className={`flex flex-col flex-1 rounded-lg h-full items-center justify-center gap-1 text-[#27272a] ${
-            item.name === "Inicio" && "text-[#f05656]"
+          className={`flex flex-col flex-1 rounded-lg h-full items-center justify-center gap-1 text-primary ${
+            item.name === "Inicio" && "text-accent"
           }`}
         >
           <item.icon />

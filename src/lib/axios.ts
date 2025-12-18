@@ -22,7 +22,9 @@ const axiosPrivate = axios.create({
 // Interceptor para agregar el token de Supabase a cada request
 axiosPrivate.interceptors.request.use(
   async (config) => {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
     if (session?.access_token) {
       config.headers.Authorization = `Bearer ${session.access_token}`;
@@ -45,7 +47,10 @@ axiosPrivate.interceptors.response.use(
 
       try {
         // Supabase maneja el refresh automáticamente
-        const { data: { session }, error: refreshError } = await supabase.auth.refreshSession();
+        const {
+          data: { session },
+          error: refreshError,
+        } = await supabase.auth.refreshSession();
 
         if (refreshError || !session) {
           throw refreshError || new Error("No session after refresh");
@@ -54,7 +59,6 @@ axiosPrivate.interceptors.response.use(
         // Actualiza el header con el nuevo token y reintenta la solicitud
         originalRequest.headers.Authorization = `Bearer ${session.access_token}`;
         return axiosPrivate(originalRequest);
-
       } catch (refreshError) {
         // Si falla el refresh → cerrar sesión y redirigir
         await supabase.auth.signOut();

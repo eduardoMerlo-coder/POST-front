@@ -106,8 +106,8 @@ export const ProductForm = ({
               {formState.step === "variant-exists"
                 ? "Datos del usuario"
                 : formState.step === "create-product-base"
-                ? "Crear producto base"
-                : "Crear variante y datos del usuario"}
+                  ? "Crear producto base"
+                  : "Crear variante y datos del usuario"}
             </p>
           )}
         </div>

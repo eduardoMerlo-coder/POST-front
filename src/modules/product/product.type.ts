@@ -20,6 +20,7 @@ export type Product = {
   brand: string;
   barcode: string;
   status: ProductStatus;
+  stock_quantity?: number;
 };
 
 export interface CatalogItem {

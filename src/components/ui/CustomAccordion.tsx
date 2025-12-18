@@ -30,7 +30,7 @@ export const CustomAccordion = ({
           }
           classNames={{
             indicator: "text-primary",
-            trigger: "pr-4"
+            trigger: "pr-4",
           }}
         >
           {item.content}

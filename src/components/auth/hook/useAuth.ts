@@ -14,6 +14,7 @@ export const useLogin = () => {
         email: data.email,
         password: data.password,
       });
+      console.log(authData);
 
       if (error) throw error;
       return authData;

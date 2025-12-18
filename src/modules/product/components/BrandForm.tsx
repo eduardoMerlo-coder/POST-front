@@ -22,9 +22,11 @@ export const BrandForm = () => {
   });
 
   const onSubmit = (data: BrandFormData) => {
+    const user_id = localStorage.getItem("user_id");
     createBrand(
       {
         name: data.name.trim(),
+        user_id: user_id || undefined,
       },
       {
         onSuccess: () => {

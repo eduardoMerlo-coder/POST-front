@@ -17,7 +17,7 @@ export const Modal = ({ content }: { content: ReactNode | null }) => {
       className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
       onClick={handleBackdropClick}
     >
-      <div onClick={(e) => e.stopPropagation()}>{content}</div>
+      {content}
     </div>
   );
 };
