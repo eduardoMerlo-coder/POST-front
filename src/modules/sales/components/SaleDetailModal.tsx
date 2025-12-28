@@ -158,18 +158,18 @@ export const SaleDetailModal = ({ saleId }: SaleDetailModalProps) => {
         defaultExpandedKeys={[]}
         selectionMode="multiple"
         className="mt-6"
-        itemClasses={{
-          base: "bg-base-alt rounded-lg border-1 border-border mb-2",
-          title: "text-lg font-semibold text-primary",
-          trigger: "px-4 py-3",
-          content: "px-4 pb-4",
-        }}
       >
         {/* Información General */}
         <AccordionItem
           key="informacion"
           aria-label="Información General"
           title="Información General"
+          classNames={{
+            base: "bg-base-alt rounded-lg border-1 border-border mb-2",
+            title: "text-lg font-semibold text-primary",
+            trigger: "px-4 py-3",
+            content: "px-4 pb-4",
+          }}
         >
           <div className="space-y-3">
             <div>
@@ -208,6 +208,12 @@ export const SaleDetailModal = ({ saleId }: SaleDetailModalProps) => {
           key="totales"
           aria-label="Totales"
           title="Totales"
+          classNames={{
+            base: "bg-base-alt rounded-lg border-1 border-border mb-2",
+            title: "text-lg font-semibold text-primary",
+            trigger: "px-4 py-3",
+            content: "px-4 pb-4",
+          }}
         >
           <div className="space-y-3">
             <div className="flex justify-between">
@@ -247,19 +253,19 @@ export const SaleDetailModal = ({ saleId }: SaleDetailModalProps) => {
         defaultExpandedKeys={["pagos"]}
         selectionMode="multiple"
         className="mt-6"
-        itemClasses={{
-          base: "bg-base-alt rounded-lg border-1 border-border mb-2",
-          title: "text-lg font-semibold text-primary",
-          trigger: "px-4 py-3",
-          content: "px-4 pb-4",
-        }}
       >
         {/* Productos */}
-        {sale.items && sale.items.length > 0 && (
+        {sale.items && sale.items.length > 0 ? (
           <AccordionItem
             key="productos"
             aria-label="Productos"
             title={`Productos (${sale.items.length})`}
+            classNames={{
+              base: "bg-base-alt rounded-lg border-1 border-border mb-2",
+              title: "text-lg font-semibold text-primary",
+              trigger: "px-4 py-3",
+              content: "px-4 pb-4",
+            }}
           >
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -293,14 +299,20 @@ export const SaleDetailModal = ({ saleId }: SaleDetailModalProps) => {
               </table>
             </div>
           </AccordionItem>
-        )}
+        ) : null}
 
         {/* Historial de Pagos */}
-        {sale.payments && sale.payments.length > 0 && (
+        {sale.payments && sale.payments.length > 0 ? (
           <AccordionItem
             key="pagos"
             aria-label="Historial de Pagos"
             title={`Historial de Pagos (${sale.payments.length})`}
+            classNames={{
+              base: "bg-base-alt rounded-lg border-1 border-border mb-2",
+              title: "text-lg font-semibold text-primary",
+              trigger: "px-4 py-3",
+              content: "px-4 pb-4",
+            }}
           >
             <div className="space-y-2">
               {sale.payments
@@ -472,7 +484,7 @@ export const SaleDetailModal = ({ saleId }: SaleDetailModalProps) => {
               </div>
             )}
           </AccordionItem>
-        )}
+        ) : null}
       </Accordion>
 
       {/* Comentarios */}

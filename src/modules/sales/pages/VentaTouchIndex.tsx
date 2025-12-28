@@ -17,7 +17,7 @@ import { ClientSearchBar } from "./venta-touch/components/ClientSearchBar";
 export const VentaTouchIndex = () => {
   const { user_id } = useAuth();
   const { setContent } = useModal();
-  const { mutate: createSale, isPending: isCreatingSale } = useCreateSale();
+  const { mutate: createSale } = useCreateSale();
   const { data: genericClient } = useGenericClient(user_id || null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);

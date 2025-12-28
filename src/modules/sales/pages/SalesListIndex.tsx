@@ -234,7 +234,7 @@ export const SalesListIndex = () => {
                         key={row.id}
                         className="h-10 even:bg-base hover:bg-surface-alt transition-colors cursor-pointer"
                         onClick={() => {
-                          openModal(SaleDetailModal, { saleId: sale.id });
+                          openModal?.(SaleDetailModal, { saleId: sale.id });
                         }}
                       >
                         {row.getVisibleCells().map((cell) => (
