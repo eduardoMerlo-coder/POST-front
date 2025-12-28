@@ -42,14 +42,7 @@ export const CategoryForm = () => {
         },
         onError: (error: any) => {
           // Supabase retorna errores de forma diferente
-          const message =
-            error?.message ??
-            error?.error_description ??
-            error?.hint ??
-            "Error al crear categoría";
           console.error("Error al crear categoría:", error);
-          // Opcional: mostrar toast de error si lo deseas
-          // toast.error(message);
         },
       }
     );

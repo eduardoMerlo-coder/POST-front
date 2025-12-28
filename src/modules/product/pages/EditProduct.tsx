@@ -64,7 +64,7 @@ export const EditProduct = () => {
 
   return (
     <ProductForm
-      initialData={productData.data as unknown as Partial<ProductFormUserType>}
+      initialData={productData as Partial<ProductFormUserType>}
       onSubmit={handleSubmit}
       isPending={isPending}
       isEditMode

@@ -6,6 +6,7 @@ import {
 import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGetUserProducts } from "../hooks/useProduct";
+import type { Product } from "../product.type";
 import { useProductColumns } from "../hooks/useProductColumns";
 import {
   ProductTable,
@@ -48,6 +49,9 @@ export const ProductIndex = () => {
     mounted && user_id ? user_id : null
   );
 
+  // Tipar explícitamente los productos como Product[]
+  const typedProducts = products as Product[];
+
   const handleDeleteProduct = (id: number) => {
     // TODO: Implementar lógica de eliminación
     console.log("id", id);
@@ -66,7 +70,7 @@ export const ProductIndex = () => {
   });
 
   const table = useReactTable({
-    data: products,
+    data: typedProducts,
     columns,
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,

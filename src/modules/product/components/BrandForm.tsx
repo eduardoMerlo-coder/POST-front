@@ -38,15 +38,7 @@ export const BrandForm = () => {
           closeModal?.();
         },
         onError: (error: any) => {
-          // Supabase retorna errores de forma diferente
-          const message =
-            error?.message ??
-            error?.error_description ??
-            error?.hint ??
-            "Error al crear marca";
           console.error("Error al crear marca:", error);
-          // Opcional: mostrar toast de error si lo deseas
-          // toast.error(message);
         },
       }
     );

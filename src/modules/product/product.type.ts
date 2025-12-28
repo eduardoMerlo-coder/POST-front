@@ -20,7 +20,7 @@ export type Product = {
   brand: string;
   barcode: string;
   status: ProductStatus;
-  stock_quantity?: number;
+  stock_quantity: number;
 };
 
 export interface CatalogItem {
@@ -93,7 +93,7 @@ export interface ProductVariant {
   capacity?: number;
   uom_id?: number;
   uom?: UomItem;
-  user_product_variant_id: number;
+  user_product_variant_id?: number; // Opcional porque las variantes del producto base no lo tienen
 }
 
 export interface ProductVariantForm {

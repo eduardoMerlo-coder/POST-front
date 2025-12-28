@@ -5,7 +5,7 @@ import {
   type FieldErrors,
   useWatch,
 } from "react-hook-form";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { ErrorMessage } from "@/components/error/ErrorMessage";
 import type { ProductFormUserType, BrandItemCreate } from "../../product.type";
 import { useBrandSearch } from "../../hooks/useBrandSearch";
@@ -46,8 +46,6 @@ export const BrandAutocompleteField = ({
     filteredItems,
   } = useBrandSearch(brands);
 
-  const [isOpen, setIsOpen] = useState(false);
-
   const brandId = useWatch({
     control,
     name: "brand_id",
@@ -62,7 +60,8 @@ export const BrandAutocompleteField = ({
         setRawSearch(selectedBrand.name);
       }
     }
-  }, [brandId, brands, rawSearch, setRawSearch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [brandId, brands, rawSearch]);
 
   return (
     <div className="flex flex-col gap-2">
@@ -84,8 +83,7 @@ export const BrandAutocompleteField = ({
               items={filteredItems}
               inputValue={rawSearch}
               radius="sm"
-              isOpen={isOpen}
-              onOpenChange={setIsOpen}
+              allowsCustomValue={false}
               onInputChange={(value) => {
                 setRawSearch(value);
                 debouncedSetSearch(value);
@@ -97,7 +95,6 @@ export const BrandAutocompleteField = ({
                 if (!field.value) {
                   setRawSearch("");
                 }
-                setIsOpen(false);
               }}
               selectedKey={field.value ? Number(field.value) : undefined}
               onSelectionChange={(key) => {
@@ -106,7 +103,7 @@ export const BrandAutocompleteField = ({
                     field.onChange(Number(id));
                     setSearch(name);
                     setRawSearch(name);
-                    setIsOpen(false); // Cerrar el autocomplete después de crear
+                    // El autocomplete se cerrará automáticamente al seleccionar
                   });
                   return;
                 }
@@ -117,7 +114,7 @@ export const BrandAutocompleteField = ({
                 if (selectedBrand) {
                   setRawSearch(selectedBrand.name);
                   field.onChange(Number(selectedBrand.id));
-                  setIsOpen(false); // Cerrar el autocomplete después de seleccionar
+                  // El autocomplete se cerrará automáticamente al seleccionar
                 } else {
                   field.onChange(undefined);
                 }
