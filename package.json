@@ -30,6 +30,7 @@
     "react-qr-barcode-scanner": "^2.1.14",
     "react-router-dom": "^7.9.1",
     "react-toastify": "^11.0.5",
+    "supabase": "link:@/lib/supabase",
     "tailwindcss": "^4.1.13"
   },
   "devDependencies": {

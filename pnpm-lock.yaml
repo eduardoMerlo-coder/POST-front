@@ -59,6 +59,9 @@ importers:
       react-toastify:
         specifier: ^11.0.5
         version: 11.0.5(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      supabase:
+        specifier: link:@/lib/supabase
+        version: link:@/lib/supabase
       tailwindcss:
         specifier: ^4.1.13
         version: 4.1.16

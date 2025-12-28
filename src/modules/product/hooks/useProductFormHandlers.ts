@@ -165,37 +165,73 @@ export const useProductFormHandlers = ({
 
     createProductBase(productBaseData, {
       onSuccess: (response: any) => {
-        const newProductBase: BaseProduct = {
-          id: response.data.id,
-          name: response.data.name,
-          brand_id: response.data.brand_id,
-          barcode: response.data.barcode,
-          categories:
-            data.categories
-              ?.map((catId) => {
+        try {
+          // Supabase RPC retorna directamente el JSON
+          // React Query pasa directamente lo que retorna la función mutationFn
+          const result = response;
+          
+          if (!result || !result.id) {
+            throw new Error("Respuesta inválida del servidor");
+          }
+          
+          // Mapear las categorías desde la respuesta o desde los datos del formulario
+          let mappedCategories: CategoryItem[] = [];
+          if (result.categories && Array.isArray(result.categories)) {
+            mappedCategories = result.categories.map((cat: any) => ({
+              id: cat.id,
+              name: cat.name,
+              description: cat.description || "",
+            }));
+          } else if (data.categories && data.categories.length > 0) {
+            // Si no vienen en la respuesta, mapearlas desde el formulario
+            mappedCategories = data.categories
+              .map((catId) => {
                 const cat = categories.find(
                   (c: CategoryItem) => String(c.id) === catId
                 );
-                return cat ? { id: cat.id, name: cat.name } : null;
+                return cat ? { id: cat.id, name: cat.name, description: cat.description || "" } : null;
               })
-              .filter((cat): cat is CategoryItem => cat !== null) || [],
-        };
+              .filter((cat): cat is CategoryItem => cat !== null);
+          }
+          
+          const newProductBase: BaseProduct = {
+            id: result.id,
+            name: result.name,
+            brand_id: result.brand_id,
+            barcode: result.barcode || undefined,
+            categories: mappedCategories,
+          };
 
-        toast.success("Producto base creado exitosamente");
-        setSelectedProductBase(newProductBase);
-        setFormState({
-          step: "create-variant",
-          productBaseId: newProductBase.id,
-          variantId: null,
-          showVariantForm: false,
-        });
+          toast.success("Producto base creado exitosamente");
+          setSelectedProductBase(newProductBase);
+          setFormState({
+            step: "create-variant",
+            productBaseId: newProductBase.id,
+            variantId: null,
+            showVariantForm: false,
+          });
+        } catch (err: any) {
+          const errorMessage = err?.message || "Error al procesar la respuesta del servidor";
+          toast.error(errorMessage);
+          console.error("Error processing product base response:", err, response);
+        }
       },
       onError: (error: any) => {
-        const message =
-          error?.data?.data?.message ??
-          error?.data?.message ??
-          "Error al crear producto base";
+        // Supabase retorna errores de forma diferente a axios
+        let message = "Error al crear producto base";
+        
+        if (error?.message) {
+          message = error.message;
+        } else if (error?.error_description) {
+          message = error.error_description;
+        } else if (error?.hint) {
+          message = error.hint;
+        } else if (typeof error === "string") {
+          message = error;
+        }
+        
         toast.error(message);
+        console.error("Error creating product base:", error);
       },
     });
   };
@@ -210,13 +246,27 @@ export const useProductFormHandlers = ({
     createBrand(
       { name, user_id: user_id || undefined },
       {
-        onSuccess: ({ data }: any) => {
+        onSuccess: (response: any) => {
+          // Supabase retorna directamente el objeto, no envuelto en data
+          const brand = response;
+          
+          if (!brand || !brand.id) {
+            toast.error("Error: No se recibió respuesta válida del servidor");
+            return;
+          }
+          
           toast.success("Marca creada exitosamente.");
-          onSuccess(Number(data.id), data.name);
+          onSuccess(Number(brand.id), brand.name);
         },
         onError: (error: any) => {
-          const message = error?.data?.data?.message ?? "Error al crear marca";
+          // Supabase retorna errores de forma diferente
+          const message =
+            error?.message ??
+            error?.error_description ??
+            error?.hint ??
+            "Error al crear marca";
           toast.error(message);
+          console.error("Error creating brand:", error);
         },
       }
     );

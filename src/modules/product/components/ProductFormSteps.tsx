@@ -263,7 +263,7 @@ export const ProductFormSteps = ({
             errors={errors}
             isDisabled={isPending || isCreatingProductBase}
             setValue={setValue}
-            showEndButton={true}
+            showEndButton={false}
           />
 
           <BrandAutocompleteField

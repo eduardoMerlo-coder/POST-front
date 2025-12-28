@@ -32,11 +32,24 @@ export const CategoryForm = () => {
         user_id: user_id || undefined,
       },
       {
-        onSuccess: () => {
+        onSuccess: (response: any) => {
+          // Supabase retorna directamente el objeto, validar que sea válido
+          if (!response || !response.id) {
+            console.error("Error: No se recibió respuesta válida del servidor", response);
+            return;
+          }
           closeModal?.();
         },
-        onError: (error) => {
+        onError: (error: any) => {
+          // Supabase retorna errores de forma diferente
+          const message =
+            error?.message ??
+            error?.error_description ??
+            error?.hint ??
+            "Error al crear categoría";
           console.error("Error al crear categoría:", error);
+          // Opcional: mostrar toast de error si lo deseas
+          // toast.error(message);
         },
       }
     );
