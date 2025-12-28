@@ -10,11 +10,15 @@ export interface AccountReceivable {
 
 export interface Client {
   id: number | string;
-  dni: string;
+  dni?: string; // Alias para document_number
+  document_number?: string;
   name: string;
+  last_name?: string;
   email?: string;
   phone?: string;
-  // Agregar más campos según la respuesta de la API
+  user_id?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface SelectedProduct {

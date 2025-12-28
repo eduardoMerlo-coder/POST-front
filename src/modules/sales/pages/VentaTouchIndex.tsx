@@ -3,11 +3,12 @@ import { useGetUserProducts } from "@/modules/product/hooks/useProduct";
 import { useAuth } from "@/setup/context/AuthContext";
 import { useModal } from "@/setup/context/ModalContext";
 import type { Product } from "@/modules/product/product.type";
-import type { SelectedProduct } from "../sales.type";
+import type { SelectedProduct, Client } from "../sales.type";
 import { debounce } from "lodash";
 import { PaymentModal, type PaymentData } from "../components/PaymentModal";
 import { toast } from "react-toastify";
 import { productService } from "@/services/product.service";
+import { useCreateSale, useGenericClient } from "../hooks/useSales";
 import { SearchBar } from "./venta-touch/components/SearchBar";
 import { ProductGrid } from "./venta-touch/components/ProductGrid";
 import { SelectedProductsPanel } from "./venta-touch/components/SelectedProductsPanel";
@@ -16,7 +17,11 @@ import { ClientSearchBar } from "./venta-touch/components/ClientSearchBar";
 export const VentaTouchIndex = () => {
   const { user_id } = useAuth();
   const { setContent } = useModal();
+  const { mutate: createSale, isPending: isCreatingSale } = useCreateSale();
+  const { data: genericClient } = useGenericClient(user_id || null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [documentType, setDocumentType] = useState<"B" | "F" | "NVT">("NVT");
   // TODO: Usar cuando se implemente filtrado por categoría
   // const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>(
@@ -347,27 +352,104 @@ export const VentaTouchIndex = () => {
   // Abrir modal de pago
   const handleOpenPaymentModal = useCallback(() => {
     const roundedTotal = roundUpToOneDecimal(totalAmount);
+    
+    // Determinar el cliente a mostrar: seleccionado o genérico
+    const clientToShow = selectedClient || genericClient;
+    const clientName = clientToShow
+      ? `${clientToShow.name}${clientToShow.last_name ? ` ${clientToShow.last_name}` : ""}`.toUpperCase()
+      : "CLIENTE GENÉRICO";
+    
+    // Verificar si el cliente es genérico (no seleccionado o es el genérico)
+    const isGenericClient =
+      !selectedClient ||
+      selectedClient.name?.toLowerCase() === "cliente generico" ||
+      selectedClient.name?.toLowerCase() === "cliente genérico" ||
+      (genericClient && selectedClient?.id === genericClient.id);
+    
     setContent?.(
       <PaymentModal
         totalAmount={roundedTotal}
+        isGenericClient={isGenericClient}
+        clientName={clientName}
         onConfirm={(paymentData: PaymentData) => {
-          // Aquí puedes manejar la confirmación del pago
-          console.log("Datos de pago:", paymentData);
-          // TODO: Implementar lógica de procesamiento de venta
+          if (!user_id) {
+            toast.error("Error: No se encontró el usuario");
+            return;
+          }
+
+          if (selectedProducts.length === 0) {
+            toast.error("Error: No hay productos seleccionados");
+            return;
+          }
+
+          // Calcular subtotal (suma de todos los productos)
+          const subtotal = selectedProducts.reduce(
+            (sum, product) => sum + product.price * product.quantity,
+            0
+          );
+
+          // Preparar pagos desde paymentData
+          // El PaymentModal ahora envía todos los métodos de pago utilizados
+          const payments = paymentData.payments || [];
+
+          // Determinar el client_id: usar el seleccionado o el genérico si no hay selección
+          let finalClientId: number | null = null;
+          if (selectedClient?.id) {
+            finalClientId = Number(selectedClient.id);
+          } else if (genericClient?.id) {
+            // Si no hay cliente seleccionado, usar el cliente genérico
+            finalClientId = Number(genericClient.id);
+          }
+
+          // Determinar el estado: si hay pago a crédito, la venta debe estar PENDING
+          const hasCreditPayment = payments.some(
+            (p) => p.payment_method === "CREDITO"
+          );
+          const finalStatus = hasCreditPayment ? "PENDING" : "COMPLETED";
+
+          // Crear la venta
+          createSale(
+            {
+              user_id,
+              client_id: finalClientId,
+              document_type: documentType,
+              subtotal,
+              total_amount: roundedTotal,
+              items: selectedProducts,
+              payments,
+              tax_amount: 0, // Por ahora sin impuestos
+              discount_amount: 0, // Por ahora sin descuentos
+              change_amount: paymentData.change,
+              status: finalStatus,
+              comments: paymentData.comment || undefined,
+            },
+            {
+              onSuccess: () => {
+                // Limpiar productos seleccionados después de crear la venta
+                setSelectedProducts([]);
+                // Limpiar cliente seleccionado
+                setSelectedClient(null);
+                toast.success("Venta creada exitosamente");
+              },
+            }
+          );
         }}
       />
     );
-  }, [totalAmount, setContent]);
+  }, [totalAmount, setContent, selectedClient, genericClient, user_id, documentType, selectedProducts, createSale]);
 
   // Callbacks para ClientSearchBar (memoizados para evitar re-renders)
   const handleClientTypeChange = useCallback((type: "B" | "F" | "NVT") => {
-    // TODO: Implementar lógica cuando cambie el tipo de cliente
-    console.log("Tipo de cliente seleccionado:", type);
+    setDocumentType(type);
   }, []);
 
   const handleClientSearch = useCallback((value: string) => {
     // TODO: Implementar búsqueda de clientes
     console.log("Buscando cliente:", value);
+  }, []);
+
+  const handleClientSelected = useCallback((client: Client | null) => {
+    setSelectedClient(client);
   }, []);
 
   const handleIncognitoClick = useCallback(() => {
@@ -381,6 +463,8 @@ export const VentaTouchIndex = () => {
         onClientTypeChange={handleClientTypeChange}
         onSearch={handleClientSearch}
         onIncognitoClick={handleIncognitoClick}
+        onClientSelected={handleClientSelected}
+        user_id={user_id}
       />
 
       <div className="flex gap-4 flex-1 min-h-0 overflow-hidden">

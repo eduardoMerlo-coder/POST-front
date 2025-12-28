@@ -8,12 +8,19 @@ import { XIcon } from "@/Icons";
 interface PaymentModalProps {
   totalAmount: number;
   onConfirm: (paymentData: PaymentData) => void;
+  isGenericClient?: boolean; // Si el cliente es genérico, no se puede dar crédito
+  clientName?: string; // Nombre del cliente seleccionado
 }
 
 export interface PaymentData {
-  paymentMethod: string;
+  paymentMethod: string; // Método principal (para compatibilidad)
   amountPaid: number;
   change: number;
+  payments: Array<{
+    payment_method: "CONTADO" | "YAPE" | "TRANSFERENCIA" | "CREDITO";
+    amount: number;
+    reference_number?: string;
+  }>;
   clientEmail?: string;
   whatsappNumber?: string;
   employeeId?: number;
@@ -22,7 +29,12 @@ export interface PaymentData {
   clientName: string;
 }
 
-export const PaymentModal = ({ totalAmount, onConfirm }: PaymentModalProps) => {
+export const PaymentModal = ({
+  totalAmount,
+  onConfirm,
+  isGenericClient = false,
+  clientName = "CLIENTE GENÉRICO",
+}: PaymentModalProps) => {
   const { closeModal } = useModal();
 
   // Función para redondear hacia arriba a 1 decimal
@@ -38,7 +50,6 @@ export const PaymentModal = ({ totalAmount, onConfirm }: PaymentModalProps) => {
   const [contadoAmount, setContadoAmount] = useState(0);
   const [yapeAmount, setYapeAmount] = useState(0);
   const [transferenciaAmount, setTransferenciaAmount] = useState(0);
-  const [clientName] = useState("CLIENTE GENÉRICO");
   const [documentType] = useState("Nota de venta");
   const [clientEmail, setClientEmail] = useState("");
   const [whatsappNumber, setWhatsappNumber] = useState("");
@@ -46,29 +57,77 @@ export const PaymentModal = ({ totalAmount, onConfirm }: PaymentModalProps) => {
   const [comment, setComment] = useState("");
   const [showReceiptSection, setShowReceiptSection] = useState(false);
 
-  // Calcular total pagado sumando todos los métodos
-  const totalPaid =
+  // Calcular total pagado sin incluir crédito (otros métodos)
+  const totalPaidWithoutCredit =
     (paymentMethods.has("CONTADO") ? contadoAmount : 0) +
     (paymentMethods.has("YAPE") ? yapeAmount : 0) +
     (paymentMethods.has("TRANSFERENCIA") ? transferenciaAmount : 0);
 
-  const faltante = Math.max(0, roundedTotal - totalPaid);
-  const change = Math.max(0, totalPaid - roundedTotal);
-  const isPaymentInsufficient = totalPaid < roundedTotal;
+  // Verificar si hay pago a crédito seleccionado
+  const hasCreditPayment = paymentMethods.has("CRÉDITO");
+  
+  // Si hay crédito, el monto de crédito es automáticamente el faltante
+  const creditAmount = hasCreditPayment
+    ? Math.max(0, roundedTotal - totalPaidWithoutCredit)
+    : 0;
+  
+  // Total pagado incluyendo crédito (para validaciones)
+  const totalPaid = totalPaidWithoutCredit + creditAmount;
+  
+  const faltante = Math.max(0, roundedTotal - totalPaidWithoutCredit);
+  const change = Math.max(0, totalPaidWithoutCredit - roundedTotal);
+  
+  // Solo validar pago insuficiente si NO hay crédito
+  // Si hay crédito, se permite crear la venta aunque el pago sea menor
+  const isPaymentInsufficient = !hasCreditPayment && totalPaidWithoutCredit < roundedTotal;
 
   const handleConfirm = () => {
-    // Validar que el pago sea suficiente
+    // Validar que el pago sea suficiente (solo si no hay crédito)
     if (isPaymentInsufficient) {
-      return; // No proceder si el pago es insuficiente
+      return; // No proceder si el pago es insuficiente y no hay crédito
     }
 
-    // Para compatibilidad con la interfaz existente, usar el primer método como principal
+    // Preparar todos los métodos de pago utilizados
+    const payments: PaymentData["payments"] = [];
+    
+    if (paymentMethods.has("CONTADO") && contadoAmount > 0) {
+      payments.push({
+        payment_method: "CONTADO",
+        amount: contadoAmount,
+      });
+    }
+    
+    if (paymentMethods.has("YAPE") && yapeAmount > 0) {
+      payments.push({
+        payment_method: "YAPE",
+        amount: yapeAmount,
+        // Aquí podrías agregar el número de referencia si lo capturas
+      });
+    }
+    
+    if (paymentMethods.has("TRANSFERENCIA") && transferenciaAmount > 0) {
+      payments.push({
+        payment_method: "TRANSFERENCIA",
+        amount: transferenciaAmount,
+        // Aquí podrías agregar el número de referencia si lo capturas
+      });
+    }
+    
+    if (paymentMethods.has("CRÉDITO") && creditAmount > 0) {
+      payments.push({
+        payment_method: "CREDITO",
+        amount: creditAmount,
+      });
+    }
+
+    // Para compatibilidad, usar el primer método como principal
     const primaryMethod = Array.from(paymentMethods)[0] || "CONTADO";
 
     const paymentData: PaymentData = {
       paymentMethod: primaryMethod,
       amountPaid: totalPaid,
       change,
+      payments,
       clientEmail: clientEmail || undefined,
       whatsappNumber: whatsappNumber || undefined,
       employeeId: employeeId || undefined,
@@ -156,7 +215,7 @@ export const PaymentModal = ({ totalAmount, onConfirm }: PaymentModalProps) => {
                           <span className="text-sm font-semibold">
                             {method}
                           </span>
-                          <button
+                          <div
                             onClick={(e) => {
                               e.stopPropagation();
                               const newMethods = new Set(paymentMethods);
@@ -167,10 +226,25 @@ export const PaymentModal = ({ totalAmount, onConfirm }: PaymentModalProps) => {
                                 setPaymentMethods(newMethods);
                               }
                             }}
-                            className="ml-1 hover:text-danger"
+                            className="ml-1 hover:text-danger cursor-pointer"
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                const newMethods = new Set(paymentMethods);
+                                newMethods.delete(method);
+                                if (newMethods.size === 0) {
+                                  setPaymentMethods(new Set(["CONTADO"]));
+                                } else {
+                                  setPaymentMethods(newMethods);
+                                }
+                              }
+                            }}
                           >
                             <FaTimes size={14} />
-                          </button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -182,6 +256,16 @@ export const PaymentModal = ({ totalAmount, onConfirm }: PaymentModalProps) => {
                 </SelectItem>
                 <SelectItem key="YAPE" textValue="YAPE">
                   YAPE
+                </SelectItem>
+                <SelectItem key="TRANSFERENCIA" textValue="TRANSFERENCIA">
+                  TRANSFERENCIA
+                </SelectItem>
+                <SelectItem 
+                  key="CRÉDITO" 
+                  textValue="CRÉDITO"
+                  isDisabled={isGenericClient}
+                >
+                  CRÉDITO
                 </SelectItem>
               </Select>
             </div>
@@ -242,6 +326,8 @@ export const PaymentModal = ({ totalAmount, onConfirm }: PaymentModalProps) => {
                 </div>
               )}
 
+              {/* CRÉDITO - No se muestra input, se calcula automáticamente */}
+
               {/* TRANSFERENCIA */}
               {paymentMethods.has("TRANSFERENCIA") && (
                 <div className="flex gap-2 items-center justify-between border-b-1 border-b-border pb-3">
@@ -268,51 +354,67 @@ export const PaymentModal = ({ totalAmount, onConfirm }: PaymentModalProps) => {
                 </div>
               )}
 
-              {/* Faltante (siempre visible) */}
-              <div className="flex gap-2 items-center justify-between pt-3">
-                <span className="text-sm font-medium text-secondary">
-                  Faltante:
-                </span>
-                <div className="flex items-center gap-2 flex-1 max-w-24">
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={faltante.toFixed(2)}
-                    readOnly
-                    classNames={{
-                      base: "w-full",
-                      inputWrapper: `!bg-surface-alt ${
-                        isPaymentInsufficient
-                          ? "border-1 border-danger"
-                          : "border-1 border-border"
-                      }`,
-                      input: "font-semibold",
-                    }}
-                  />
+              {/* Faltante (solo visible si NO hay crédito) */}
+              {!hasCreditPayment && (
+                <div className="flex gap-2 items-center justify-between pt-3">
+                  <span className="text-sm font-medium text-secondary">
+                    Faltante:
+                  </span>
+                  <div className="flex items-center gap-2 flex-1 max-w-24">
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={faltante.toFixed(2)}
+                      readOnly
+                      classNames={{
+                        base: "w-full",
+                        inputWrapper: `!bg-surface-alt ${
+                          isPaymentInsufficient
+                            ? "border-1 border-danger"
+                            : "border-1 border-border"
+                        }`,
+                        input: "font-semibold",
+                      }}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {/* Vuelto (siempre visible) */}
-              <div className="flex gap-2 items-center justify-between pt-3">
-                <span className="text-sm font-medium text-secondary">
-                  Vuelto:
-                </span>
-                <div className="flex items-center gap-2 flex-1 max-w-24">
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={change.toFixed(2)}
-                    readOnly
-                    classNames={{
-                      base: "w-full",
-                      inputWrapper: "!bg-surface-alt border-1 border-border",
-                      input: "font-semibold",
-                    }}
-                  />
+              {/* Vuelto (solo visible si NO hay crédito) */}
+              {!hasCreditPayment && (
+                <div className="flex gap-2 items-center justify-between pt-3">
+                  <span className="text-sm font-medium text-secondary">
+                    Vuelto:
+                  </span>
+                  <div className="flex items-center gap-2 flex-1 max-w-24">
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={change.toFixed(2)}
+                      readOnly
+                      classNames={{
+                        base: "w-full",
+                        inputWrapper: "!bg-surface-alt border-1 border-border",
+                        input: "font-semibold",
+                      }}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Información de crédito (solo visible si hay crédito) */}
+              {hasCreditPayment && (
+                <div className="flex gap-2 items-center justify-between pt-3 border-t-1 border-border">
+                  <span className="text-sm font-medium text-secondary">
+                    Monto a Crédito:
+                  </span>
+                  <span className="text-sm font-semibold text-primary">
+                    S/ {creditAmount.toFixed(2)}
+                  </span>
+                </div>
+              )}
             </div>
           )}
         </div>

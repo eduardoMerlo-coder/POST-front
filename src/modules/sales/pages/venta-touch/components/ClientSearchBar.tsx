@@ -4,8 +4,10 @@ import { Button, Autocomplete, AutocompleteItem } from "@heroui/react";
 import { BsIncognito } from "react-icons/bs";
 import { HiMagnifyingGlass } from "react-icons/hi2";
 import { debounce } from "lodash";
-import { useClientSearch } from "../../../hooks/useSales";
-import type { Client } from "../../../sales.type";
+import { useClientSearch, useGenericClient } from "@/modules/sales/hooks/useSales";
+import { useModal } from "@/setup/context/ModalContext";
+import { ClientForm } from "@/modules/sales/components/ClientForm";
+import type { Client } from "@/modules/sales/sales.type";
 
 type ClientType = "B" | "F" | "NVT";
 
@@ -13,6 +15,8 @@ interface ClientSearchBarProps {
   onClientTypeChange?: (type: ClientType) => void;
   onSearch?: (value: string) => void;
   onIncognitoClick?: () => void;
+  onClientSelected?: (client: Client | null) => void;
+  user_id?: string | null;
 }
 
 export const ClientSearchBar = memo(
@@ -20,8 +24,11 @@ export const ClientSearchBar = memo(
     onClientTypeChange,
     onSearch,
     onIncognitoClick,
+    onClientSelected,
+    user_id,
   }: ClientSearchBarProps) => {
-    const [clientType, setClientType] = useState<ClientType>("B");
+    const { openModal } = useModal();
+    const [clientType, setClientType] = useState<ClientType>("NVT");
     const [inputValue, setInputValue] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
@@ -40,11 +47,37 @@ export const ClientSearchBar = memo(
       };
     }, [debouncedSetSearch]);
 
+    // Notificar el tipo de cliente por defecto al montar
+    useEffect(() => {
+      onClientTypeChange?.("NVT");
+    }, []); // Solo al montar
+
     // Hook para buscar clientes
     const { data: clients = [], isLoading } = useClientSearch(
       searchTerm,
-      searchTerm.trim().length > 0
+      searchTerm.trim().length > 0,
+      user_id || null
     );
+
+    // Hook para obtener el cliente genérico (se carga una vez y se cachea)
+    const { data: genericClient } = useGenericClient(user_id || null);
+
+    // Preparar items para el autocomplete (incluyendo opción de crear si no hay resultados)
+    const autocompleteItems = useMemo(() => {
+      const items: (Client | { id: "create"; name: string })[] = [...clients];
+      // Si hay búsqueda pero no hay resultados, agregar opción de crear
+      if (
+        searchTerm.trim().length > 0 &&
+        clients.length === 0 &&
+        !isLoading
+      ) {
+        items.push({
+          id: "create",
+          name: `Crear "${searchTerm}"`,
+        } as any);
+      }
+      return items;
+    }, [clients, searchTerm, isLoading]);
 
     const cycleClientType = () => {
       const nextType: ClientType =
@@ -62,6 +95,7 @@ export const ClientSearchBar = memo(
           setSelectedClient(null);
           setIsIncognitoSelected(false);
           onSearch?.("");
+          onClientSelected?.(null);
         }
       },
       [debouncedSetSearch, onSearch]
@@ -69,6 +103,30 @@ export const ClientSearchBar = memo(
 
     const handleSelectionChange = useCallback(
       (key: Key | null) => {
+        if (key === "create") {
+          // Abrir modal de creación de cliente
+          if (user_id) {
+            openModal?.(ClientForm, {
+              searchTerm,
+              user_id,
+              onClientCreated: (newClient: any) => {
+                // Transformar el cliente creado para compatibilidad
+                const transformedClient: Client = {
+                  ...newClient,
+                  dni: newClient.document_number || "",
+                };
+                setSelectedClient(transformedClient);
+                const newClientName = `${newClient.name}${newClient.last_name ? ` ${newClient.last_name}` : ""}`.toUpperCase();
+                setInputValue(newClientName);
+                setIsIncognitoSelected(false);
+                onSearch?.(newClientName);
+                onClientSelected?.(transformedClient);
+              },
+            });
+          }
+          return;
+        }
+
         if (key && clients.length > 0) {
           const keyString = String(key);
           const client = clients.find(
@@ -76,18 +134,21 @@ export const ClientSearchBar = memo(
           );
           if (client) {
             setSelectedClient(client);
-            setInputValue(client.name || client.dni);
+            const clientName = `${client.name}${client.last_name ? ` ${client.last_name}` : ""}`.toUpperCase();
+            setInputValue(clientName);
             setIsIncognitoSelected(false); // Deseleccionar el botón de incógnito cuando se selecciona un cliente
-            onSearch?.(client.name || client.dni);
+            onSearch?.(clientName);
+            onClientSelected?.(client);
           }
         } else if (key === null) {
           setSelectedClient(null);
           setInputValue("");
           setIsIncognitoSelected(false);
           onSearch?.("");
+          onClientSelected?.(null);
         }
       },
-      [clients, onSearch]
+      [clients, onSearch, searchTerm, user_id, openModal]
     );
 
     const handleIncognitoClick = () => {
@@ -98,14 +159,20 @@ export const ClientSearchBar = memo(
         setSelectedClient(null);
         setSearchTerm("");
         onSearch?.("");
+        onClientSelected?.(null);
       } else {
-        // Si no está seleccionado, seleccionar y establecer cliente genérico
-        const genericClient = "CLIENTE GENERICO";
+        // Si no está seleccionado, usar el cliente genérico del cache
+        if (!genericClient) {
+          console.warn("Cliente genérico no disponible");
+          return;
+        }
+
         setIsIncognitoSelected(true);
-        setInputValue(genericClient);
-        setSelectedClient(null);
+        setSelectedClient(genericClient);
+        setInputValue(genericClient.name.toUpperCase());
         setSearchTerm("");
-        onSearch?.(genericClient);
+        onSearch?.(genericClient.name.toUpperCase());
+        onClientSelected?.(genericClient);
         onIncognitoClick?.();
       }
     };
@@ -200,7 +267,7 @@ export const ClientSearchBar = memo(
                 : null
             }
             isLoading={isLoading}
-            items={clients}
+            items={autocompleteItems}
             allowsCustomValue={false}
             startContent={
               <HiMagnifyingGlass className="text-secondary text-lg" />
@@ -236,21 +303,41 @@ export const ClientSearchBar = memo(
             radius="sm"
             size="md"
           >
-            {(client: Client) => (
-              <AutocompleteItem
-                key={String(client.id || client.dni)}
-                textValue={client.name || client.dni}
-              >
-                <div className="flex flex-col">
-                  <span className="text-sm text-primary">
-                    {client.name || "Sin nombre"}
-                  </span>
-                  <span className="text-xs text-secondary">
-                    DNI: {client.dni}
-                  </span>
-                </div>
-              </AutocompleteItem>
-            )}
+            {(item: Client | { id: "create"; name: string }) => {
+              if (item.id === "create") {
+                return (
+                  <AutocompleteItem
+                    key="create"
+                    textValue={item.name}
+                    className="font-bold text-accent"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm">{item.name}</span>
+                    </div>
+                  </AutocompleteItem>
+                );
+              }
+
+              const client = item as Client;
+              const clientFullName = `${client.name || "Sin nombre"}${client.last_name ? ` ${client.last_name}` : ""}`.toUpperCase();
+              return (
+                <AutocompleteItem
+                  key={String(client.id || client.dni || client.document_number)}
+                  textValue={client.name || client.dni || client.document_number}
+                >
+                  <div className="flex flex-col">
+                    <span className="text-sm text-primary">
+                      {clientFullName}
+                    </span>
+                    {(client.dni || client.document_number) && (
+                      <span className="text-xs text-secondary">
+                        DNI: {client.dni || client.document_number}
+                      </span>
+                    )}
+                  </div>
+                </AutocompleteItem>
+              );
+            }}
           </Autocomplete>
         </div>
       </div>

@@ -11,15 +11,15 @@ const ROUTE_CONFIG: Record<string, string> = {
   "/product/category": "Categorias",
   "/sales": "Ventas",
   "/sales/venta-touch": "Venta Touch",
-  "/sales/accounts-receivable": "Cuentas por cobrar",
+  "/sales/list": "Lista de Ventas",
 };
 
 // Rutas que deben omitir el nivel intermedio (no mostrar "Productos" en el medio)
 const FLAT_ROUTES: Record<string, { label: string; path: string }> = {
   "/product/category": { label: "Categorias", path: "/product/category" },
-  "/sales/accounts-receivable": {
-    label: "Cuentas por cobrar",
-    path: "/sales/accounts-receivable",
+  "/sales/list": {
+    label: "Lista de Ventas",
+    path: "/sales/list",
   },
 };
 
@@ -65,9 +65,9 @@ const getRouteLabel = (
       return "Venta Touch";
     }
 
-    // Si es "accounts-receivable", retornar "Cuentas por cobrar"
-    if (secondSegment === "accounts-receivable") {
-      return "Cuentas por cobrar";
+    // Si es "list", retornar "Lista de Ventas"
+    if (secondSegment === "list") {
+      return "Lista de Ventas";
     }
   }
 

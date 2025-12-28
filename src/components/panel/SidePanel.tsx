@@ -71,8 +71,8 @@ export const SidePanel = ({ isOpen = true, onClose }: SidePanelProps) => {
                     path: "/sales/venta-touch",
                   },
                   {
-                    label: "Cuentas por cobrar",
-                    path: "/sales/accounts-receivable",
+                    label: "Lista de Ventas",
+                    path: "/sales/list",
                   },
                 ]}
                 handleChange={handleNavigation}
