@@ -1,30 +1,25 @@
-import { axiosPrivate } from "@/lib/axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { productService } from "@/services/product.service";
+import { catalogService } from "@/services/catalog.service";
+import { uomService } from "@/services/uom.service";
 import type {
   BrandItem,
-  Product,
   ProductForm,
   ProductBaseForm,
   ProductVariantForm,
-  BaseProduct,
-  ProductVariant,
 } from "../product.type";
-import type { UomItem, CategoryItem } from "../product.type";
 
-export const useApiQuery = <T>(key: string, url: string) => {
+export const useGetAllUom = () => {
   const oneDayInMs = 60 * 60 * 24 * 1000; // 1 día en milisegundos
   return useQuery({
-    queryKey: [key],
+    queryKey: ["list-uom"],
     queryFn: async () => {
-      const res = await axiosPrivate.get<T>(url);
-      return res.data;
+      return await uomService.getAllUoms();
     },
-    staleTime: oneDayInMs, // Los datos se consideran frescos por 1 día
-    gcTime: oneDayInMs, // Los datos permanecen en caché por 1 día
+    staleTime: oneDayInMs,
+    gcTime: oneDayInMs,
   });
 };
-
-export const useGetAllUom = () => useApiQuery<UomItem[]>("list-uom", "/uom");
 
 export const useGetAllCategories = (user_id: string | null) => {
   return useQuery({
@@ -33,12 +28,8 @@ export const useGetAllCategories = (user_id: string | null) => {
       if (!user_id) {
         throw new Error("user_id is required");
       }
-      const res = await axiosPrivate.get<CategoryItem[]>("/category", {
-        params: {
-          user_id,
-        },
-      });
-      return res.data;
+      const result = await catalogService.getAllCategories(1, 1000, user_id);
+      return result.categories;
     },
     enabled: !!user_id,
     staleTime: 60 * 60 * 24 * 1000, // 1 día en milisegundos
@@ -58,100 +49,18 @@ export const useGetCategories = (
       if (!user_id) {
         throw new Error("user_id is required");
       }
-      try {
-        // Intentar obtener con paginación
-        const res = await axiosPrivate.get<{
-          categories?: CategoryItem[];
-          category?: CategoryItem[]; // Por si viene como 'category'
-          data?: CategoryItem[]; // Por si viene como 'data'
-          total?: number;
-        }>("/category", {
-          params: {
-            user_id,
-            page,
-            per_page,
-            searchTerm: searchTerm || undefined,
-            sort: "name",
-            order: "asc",
-          },
-        });
-
-        const data = res.data;
-
-        // Si la respuesta tiene el formato paginado esperado
-        if (data.total !== undefined) {
-          return {
-            categories: data.categories || data.category || data.data || [],
-            total: data.total,
-          };
-        }
-
-        // Si es un array directo, hacer paginación del lado del cliente
-        let allCategories = Array.isArray(data)
-          ? data
-          : data.categories || data.category || data.data || [];
-
-        // Filtrar por searchTerm si existe (búsqueda del lado del cliente)
-        if (searchTerm && searchTerm.trim()) {
-          const searchLower = searchTerm.toLowerCase().trim();
-          allCategories = allCategories.filter(
-            (cat: CategoryItem) =>
-              cat.name.toLowerCase().includes(searchLower) ||
-              (cat.description &&
-                cat.description.toLowerCase().includes(searchLower))
-          );
-        }
-
-        const startIndex = (page - 1) * per_page;
-        const endIndex = startIndex + per_page;
-        const paginatedCategories = allCategories.slice(startIndex, endIndex);
-
-        return {
-          categories: paginatedCategories,
-          total: allCategories.length,
-        };
-      } catch {
-        // Si falla, intentar obtener todas las categorías
-        const res = await axiosPrivate.get<
-          | CategoryItem[]
-          | {
-              categories?: CategoryItem[];
-              category?: CategoryItem[];
-              data?: CategoryItem[];
-            }
-        >("/category", {
-          params: {
-            user_id,
-          },
-        });
-
-        let allCategories = Array.isArray(res.data)
-          ? res.data
-          : (res.data as any).categories ||
-            (res.data as any).category ||
-            (res.data as any).data ||
-            [];
-
-        // Filtrar por searchTerm si existe (búsqueda del lado del cliente)
-        if (searchTerm && searchTerm.trim()) {
-          const searchLower = searchTerm.toLowerCase().trim();
-          allCategories = allCategories.filter(
-            (cat: CategoryItem) =>
-              cat.name.toLowerCase().includes(searchLower) ||
-              (cat.description &&
-                cat.description.toLowerCase().includes(searchLower))
-          );
-        }
-
-        const startIndex = (page - 1) * per_page;
-        const endIndex = startIndex + per_page;
-        const paginatedCategories = allCategories.slice(startIndex, endIndex);
-
-        return {
-          categories: paginatedCategories,
-          total: allCategories.length,
-        };
-      }
+      const result = await catalogService.getAllCategories(
+        page,
+        per_page,
+        user_id,
+        searchTerm,
+        "name",
+        "asc"
+      );
+      return {
+        categories: result.categories,
+        total: result.total,
+      };
     },
     enabled: !!user_id,
     initialData: { categories: [], total: 0 },
@@ -165,12 +74,7 @@ export const useGetBrands = (user_id: string | null) => {
       if (!user_id) {
         throw new Error("user_id is required");
       }
-      const res = await axiosPrivate.get<BrandItem[]>("/brand", {
-        params: {
-          user_id,
-        },
-      });
-      return res.data;
+      return await catalogService.getBrands(user_id);
     },
     enabled: !!user_id,
     staleTime: 60 * 60 * 24 * 1000, // 1 día en milisegundos
@@ -190,94 +94,27 @@ export const useGetBrandsPaginated = (
       if (!user_id) {
         throw new Error("user_id is required");
       }
-      try {
-        // Intentar obtener con paginación del servidor
-        const res = await axiosPrivate.get<
-          | {
-              brands?: BrandItem[];
-              brand?: BrandItem[];
-              data?: BrandItem[];
-              total?: number;
-            }
-          | BrandItem[]
-        >("/brand", {
-          params: {
-            user_id,
-            page,
-            per_page,
-            searchTerm: searchTerm || undefined,
-            sort: "name",
-            order: "asc",
-          },
-        });
-
-        const responseData = res.data;
-
-        // Si la respuesta tiene el formato paginado esperado (con total)
-        if (!Array.isArray(responseData) && responseData.total !== undefined) {
-          return {
-            brands:
-              responseData.brands ||
-              responseData.brand ||
-              responseData.data ||
-              [],
-            total: responseData.total,
-          };
-        }
-
-        // Si es un array directo o no tiene paginación, usar todos los datos
-        // y hacer paginación del lado del cliente
-        let allBrands = Array.isArray(responseData)
-          ? responseData
-          : responseData.brands ||
-            responseData.brand ||
-            responseData.data ||
-            [];
-
-        // Filtrar por searchTerm si existe (búsqueda del lado del cliente)
-        if (searchTerm && searchTerm.trim()) {
-          const searchLower = searchTerm.toLowerCase().trim();
-          allBrands = allBrands.filter((brand: BrandItem) =>
-            brand.name.toLowerCase().includes(searchLower)
-          );
-        }
-
-        // Paginación del lado del cliente
-        const startIndex = (page - 1) * per_page;
-        const endIndex = startIndex + per_page;
-        const paginatedBrands = allBrands.slice(startIndex, endIndex);
-
-        return {
-          brands: paginatedBrands,
-          total: allBrands.length,
-        };
-      } catch {
-        // Si falla la petición con parámetros, obtener todas las marcas
-        const res = await axiosPrivate.get<BrandItem[]>("/brand", {
-          params: {
-            user_id,
-          },
-        });
-        let allBrands = Array.isArray(res.data) ? res.data : [];
-
-        // Filtrar por searchTerm si existe (búsqueda del lado del cliente)
-        if (searchTerm && searchTerm.trim()) {
-          const searchLower = searchTerm.toLowerCase().trim();
-          allBrands = allBrands.filter((brand: BrandItem) =>
-            brand.name.toLowerCase().includes(searchLower)
-          );
-        }
-
-        // Paginación del lado del cliente
-        const startIndex = (page - 1) * per_page;
-        const endIndex = startIndex + per_page;
-        const paginatedBrands = allBrands.slice(startIndex, endIndex);
-
-        return {
-          brands: paginatedBrands,
-          total: allBrands.length,
-        };
+      // Get all brands and do client-side pagination since backend doesn't support pagination for brands
+      const allBrands = await catalogService.getBrands(user_id);
+      
+      // Filter by searchTerm if exists
+      let filteredBrands = allBrands;
+      if (searchTerm && searchTerm.trim()) {
+        const searchLower = searchTerm.toLowerCase().trim();
+        filteredBrands = allBrands.filter((brand: BrandItem) =>
+          brand.name.toLowerCase().includes(searchLower)
+        );
       }
+
+      // Client-side pagination
+      const startIndex = (page - 1) * per_page;
+      const endIndex = startIndex + per_page;
+      const paginatedBrands = filteredBrands.slice(startIndex, endIndex);
+
+      return {
+        brands: paginatedBrands,
+        total: filteredBrands.length,
+      };
     },
     enabled: !!user_id,
     initialData: { brands: [], total: 0 },
@@ -291,18 +128,15 @@ export const useGetAllBaseProducts = (
 ) => {
   return useQuery({
     queryKey: ["all-base-products", page, per_page, searchTerm],
-    queryFn: () =>
-      axiosPrivate
-        .get<{ products: Product[]; total: number }>("/base-products", {
-          params: {
-            page,
-            per_page,
-            searchTerm,
-            sort: "name",
-            order: "asc",
-          },
-        })
-        .then((res) => res.data),
+    queryFn: async () => {
+      return await productService.getAllBaseProducts(
+        page,
+        per_page,
+        searchTerm || undefined,
+        "name",
+        "asc"
+      );
+    },
     initialData: { products: [], total: 0 },
   });
 };
@@ -316,20 +150,17 @@ export const useGetUserProducts = (
   return useQuery({
     queryKey: ["user-products", page, per_page, searchTerm, user_id],
     queryFn: async () => {
-      const res = await axiosPrivate.get<{
-        products: Product[];
-        total: number;
-      }>("/user-products", {
-        params: {
-          page,
-          per_page,
-          searchTerm,
-          sort: "name",
-          order: "asc",
-          user_id: user_id || undefined,
-        },
-      });
-      return res.data;
+      if (!user_id) {
+        throw new Error("user_id is required");
+      }
+      return await productService.getUserProducts(
+        page,
+        per_page,
+        user_id,
+        searchTerm || undefined,
+        "name",
+        "asc"
+      );
     },
     enabled: !!user_id,
     initialData: { products: [], total: 0 },
@@ -339,14 +170,33 @@ export const useGetUserProducts = (
 export const useCreateProductBase = () => {
   return useMutation({
     mutationFn: (data: ProductBaseForm) =>
-      axiosPrivate.post("/product-base", { ...data }),
+      productService.createBaseProduct({
+        name: data.name,
+        brand_id: data.brand_id,
+        categories: data.categories.map((cat) => Number(cat)).filter((cat) => !isNaN(cat)),
+      }),
   });
 };
 
 export const useCreateProductVariant = () => {
   return useMutation({
-    mutationFn: (data: ProductVariantForm) =>
-      axiosPrivate.post("/product-variant", { ...data }),
+    mutationFn: (data: ProductVariantForm) => {
+      if (!data.capacity) {
+        throw new Error("capacity is required");
+      }
+      return productService.createProductVariantWithUser({
+        product_base_id: data.product_base_id,
+        presentation: data.presentation,
+        capacity: data.capacity,
+        unit_id: Number(data.unit_id),
+        units: data.units,
+        barcode: data.barcode || "",
+        price: data.price,
+        stock_quantity: data.stock_quantity,
+        min_stock: data.min_stock,
+        user_id: data.user_id,
+      });
+    },
   });
 };
 
@@ -359,7 +209,7 @@ export const useCreateUserProductVariant = () => {
       stock_quantity: number;
       min_stock: number;
       user_id: string;
-    }) => axiosPrivate.post("/user-product-variant", { ...data }),
+    }) => productService.createUserProductVariant(data),
   });
 };
 
@@ -367,7 +217,11 @@ export const useUpdateProduct = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: ProductForm }) =>
-      axiosPrivate.put(`/product-base/${id}`, { ...data }),
+      productService.updateBaseProduct(id, {
+        name: data.name,
+        brand_id: data.brand_id,
+        categories: data.categories.map((cat) => Number(cat)).filter((cat) => !isNaN(cat)),
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["all-base-products"] });
       queryClient.invalidateQueries({ queryKey: ["product-base"] });
@@ -378,7 +232,7 @@ export const useUpdateProduct = () => {
 export const useUpdateUserProductPrice = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       variant_id,
       user_id,
       price,
@@ -386,12 +240,20 @@ export const useUpdateUserProductPrice = () => {
       variant_id: number;
       user_id: string;
       price: number;
-    }) =>
-      axiosPrivate.put(`/user-product-variant/${variant_id}`, {
-        variant_id,
-        user_id,
-        price,
-      }),
+    }) => {
+      // Get user products to find the user_product_variant_id
+      const userProducts = await productService.getUserProducts(1, 1000, user_id);
+      const userProduct = userProducts.products.find(
+        (p: any) => p.variant_id === variant_id
+      );
+      if (!userProduct) {
+        throw new Error("User product variant not found");
+      }
+      return productService.updateUserProductVariant(
+        userProduct.user_product_variant_id,
+        { price }
+      );
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-products"] });
     },
@@ -414,7 +276,14 @@ export const useUpdateProductVariant = () => {
         units?: number;
         barcode?: string;
       };
-    }) => axiosPrivate.put(`/product-variant/${id}`, { ...data }),
+    }) =>
+      productService.updateProductVariant(id, {
+        presentation: data.presentation,
+        capacity: data.capacity,
+        unit_id: data.unit_id ? Number(data.unit_id) : undefined,
+        units: data.units,
+        barcode: data.barcode,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-products"] });
       queryClient.invalidateQueries({ queryKey: ["product-base"] });
@@ -437,9 +306,7 @@ export const useUpdateUserProductVariant = () => {
         min_stock?: number;
       };
     }) =>
-      axiosPrivate.put(`/user-product-variant/${user_product_variant_id}`, {
-        ...data,
-      }),
+      productService.updateUserProductVariant(user_product_variant_id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-products"] });
       queryClient.invalidateQueries({ queryKey: ["product-base"] });
@@ -450,15 +317,9 @@ export const useUpdateUserProductVariant = () => {
 export const useCreateBrand = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: { name: string; user_id?: string }) => {
-      const body: { name: string; user_id?: string } = { name: data.name };
-      if (data.user_id) {
-        body.user_id = data.user_id;
-      }
-      return axiosPrivate.post("/brand", body);
-    },
+    mutationFn: (data: { name: string; user_id?: string }) =>
+      catalogService.createBrand(data),
     onSuccess: () => {
-      // Invalidar todas las queries relacionadas con marcas
       queryClient.invalidateQueries({ queryKey: ["product-brand"] });
       queryClient.invalidateQueries({ queryKey: ["brands-paginated"] });
     },
@@ -469,9 +330,8 @@ export const useUpdateBrand = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: { name: string } }) =>
-      axiosPrivate.put(`/brand/${id}`, { ...data }),
+      catalogService.updateBrand(id, data),
     onSuccess: () => {
-      // Invalidar todas las queries relacionadas con marcas
       queryClient.invalidateQueries({ queryKey: ["product-brand"] });
       queryClient.invalidateQueries({ queryKey: ["brands-paginated"] });
     },
@@ -485,22 +345,8 @@ export const useCreateCategory = () => {
       name: string;
       description: string;
       user_id?: string;
-    }) => {
-      const body: {
-        name: string;
-        description: string;
-        user_id?: string;
-      } = {
-        name: data.name,
-        description: data.description,
-      };
-      if (data.user_id) {
-        body.user_id = data.user_id;
-      }
-      return axiosPrivate.post("/category", body);
-    },
+    }) => catalogService.createCategory(data),
     onSuccess: () => {
-      // Invalidar todas las queries relacionadas con categorías
       queryClient.invalidateQueries({ queryKey: ["product-categories"] });
       queryClient.invalidateQueries({ queryKey: ["categories-paginated"] });
     },
@@ -516,9 +362,8 @@ export const useUpdateCategory = () => {
     }: {
       id: number;
       data: { name: string; description: string };
-    }) => axiosPrivate.put(`/category/${id}`, { ...data }),
+    }) => catalogService.updateCategory(id, data),
     onSuccess: () => {
-      // Invalidar todas las queries relacionadas con categorías
       queryClient.invalidateQueries({ queryKey: ["product-categories"] });
       queryClient.invalidateQueries({ queryKey: ["categories-paginated"] });
     },
@@ -528,8 +373,7 @@ export const useUpdateCategory = () => {
 export const useGetBaseProductById = (id: number) => {
   return useQuery({
     queryKey: ["product-base", id],
-    queryFn: () =>
-      axiosPrivate.get<ProductVariant>(`/user-product-variant/${id}`),
+    queryFn: () => productService.getUserProductVariantById(id),
   });
 };
 
@@ -545,39 +389,12 @@ export const useCheckUserProductExists = (
         return false;
       }
       try {
-        const res = await axiosPrivate.get<{ exists: boolean }>(
-          `/user-product-variant/check`,
-          {
-            params: {
-              variant_id: variantId,
-              user_id: userId,
-            },
-          }
+        return await productService.checkUserProductVariantExists(
+          variantId,
+          userId
         );
-        return res.data.exists;
       } catch {
-        // Si el endpoint no existe o falla, intentar otra forma
-        // Buscar en la lista de productos del usuario
-        try {
-          const res = await axiosPrivate.get<{
-            products: Product[];
-            total: number;
-          }>("/user-products", {
-            params: {
-              page: 1,
-              per_page: 1000,
-              searchTerm: "",
-              user_id: userId,
-            },
-          });
-          const exists =
-            res.data.products.some(
-              (p: Product) => p.variant_id === variantId
-            ) || false;
-          return exists;
-        } catch {
-          return false;
-        }
+        return false;
       }
     },
     enabled: enabled && !!variantId && !!userId,
@@ -592,17 +409,7 @@ export const useSearchBaseProducts = (
   return useQuery({
     queryKey: ["search-base-products", searchTerm],
     queryFn: () =>
-      axiosPrivate
-        .get<{ products: BaseProduct[]; total: number }>("/base-products", {
-          params: {
-            page: 1,
-            per_page: 20,
-            searchTerm,
-            sort: "name",
-            order: "asc",
-          },
-        })
-        .then((res) => res.data),
+      productService.getAllBaseProducts(1, 20, searchTerm, "name", "asc"),
     enabled: enabled && searchTerm.length > 0,
     staleTime: 30000, // 30 segundos
   });
@@ -615,10 +422,10 @@ export const useGetVariantsByProductId = (
   return useQuery({
     queryKey: ["product-variants", productId],
     queryFn: async () => {
-      const res = await axiosPrivate.get<ProductVariant[]>(
-        `/product-base/${productId}/variants`
-      );
-      return res.data;
+      if (!productId) {
+        throw new Error("productId is required");
+      }
+      return await productService.getVariantsByProductId(productId);
     },
     enabled: enabled && productId !== null && productId > 0,
     staleTime: 60000, // 1 minuto

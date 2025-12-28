@@ -7,7 +7,7 @@ import type { SelectedProduct } from "../sales.type";
 import { debounce } from "lodash";
 import { PaymentModal, type PaymentData } from "../components/PaymentModal";
 import { toast } from "react-toastify";
-import { axiosPrivate } from "@/lib/axios";
+import { productService } from "@/services/product.service";
 import { SearchBar } from "./venta-touch/components/SearchBar";
 import { ProductGrid } from "./venta-touch/components/ProductGrid";
 import { SelectedProductsPanel } from "./venta-touch/components/SelectedProductsPanel";
@@ -154,27 +154,25 @@ export const VentaTouchIndex = () => {
   const fetchProductByBarcode = useMemo(() => {
     return async (barcode: string): Promise<Product | null> => {
       if (!user_id) return null;
-      const res = await axiosPrivate.get<{
-        products: Product[];
-        total: number;
-      }>("/user-products", {
-        params: {
-          page: 1,
-          per_page: 10,
-          searchTerm: barcode,
-          sort: "name",
-          order: "asc",
+      try {
+        const result = await productService.getUserProducts(
+          1,
+          1000, // Get more products to search through
           user_id,
-        },
-      });
-
-      // Compat: algunos callers tratan axiosPrivate como AxiosResponse, otros como "data" directo.
-      const payload: any = (res as any)?.data ?? res;
-      const list: Product[] = payload?.products ?? [];
-      const exact = list.find(
-        (p) => p.barcode && p.barcode.trim() === barcode.trim()
-      );
-      return exact || null;
+          barcode,
+          "name",
+          "asc"
+        );
+        
+        const list: Product[] = result.products || [];
+        const exact = list.find(
+          (p) => p.barcode && p.barcode.trim() === barcode.trim()
+        );
+        return exact || null;
+      } catch (error) {
+        console.error("Error fetching product by barcode:", error);
+        return null;
+      }
     };
   }, [user_id]);
 

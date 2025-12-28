@@ -40,7 +40,7 @@ export const ModuleLayout = () => {
           <Breadcrumb />
           <Profile />
         </header>
-        <div className="bg-base-alt shadow-md p-4 rounded-lg flex-1 min-h-0 overflow-hidden">
+        <div className="bg-base-alt shadow-md p-4 rounded-lg flex-1 min-h-0 overflow-y-auto md:overflow-hidden">
           <Outlet />
         </div>
       </main>

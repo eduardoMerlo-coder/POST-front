@@ -20,7 +20,7 @@ export const PriceField = ({
       <Input
         {...register("price", {
           required: "El precio es requerido",
-          min: { value: 0.01, message: "El precio debe ser mayor a 0" },
+          min: { value: 0, message: "El precio no puede ser negativo" },
           valueAsNumber: true,
         })}
         type="number"

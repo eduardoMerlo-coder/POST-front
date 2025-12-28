@@ -94,8 +94,8 @@ export const ProductForm = ({
   });
 
   return (
-    <div className="pt-10 max-w-[800px] mx-auto">
-      <div className="flex items-center justify-between mb-6">
+    <div className="pt-10 max-w-[800px] mx-auto h-full flex flex-col">
+      <div className="flex items-center justify-between mb-6 flex-shrink-0">
         <div>
           <h2 className="text-2xl font-bold">
             {isEditMode ? "Editar Producto" : "Nuevo Producto"}
@@ -140,6 +140,7 @@ export const ProductForm = ({
         )}
 
       <form
+        className="flex-1 min-h-0"
         onSubmit={state.handleSubmit((data) => {
           const customReset = () => {
             state.reset();
