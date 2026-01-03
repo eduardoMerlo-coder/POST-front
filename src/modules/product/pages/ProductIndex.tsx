@@ -69,6 +69,7 @@ export const ProductIndex = () => {
     onDelete: handleDeleteProduct,
   });
 
+  console.log("typedProducts", typedProducts);
   const table = useReactTable({
     data: typedProducts,
     columns,

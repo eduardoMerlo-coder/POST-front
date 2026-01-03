@@ -271,6 +271,7 @@ export class ProductService {
           product_id: product?.id || 0,
           user_product_variant_id: upv.id || 0,
           name: product?.name || "",
+          variant_name: variant?.name || "",
           price: String(upv.price || 0),
           capacity: variant?.capacity || 0,
           unit: variant?.uom?.name || "",

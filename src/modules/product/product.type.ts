@@ -14,6 +14,7 @@ export type Product = {
   product_id: number;
   user_product_variant_id: number;
   name: string;
+  variant_name: string;
   price: string;
   capacity: number;
   unit: string;

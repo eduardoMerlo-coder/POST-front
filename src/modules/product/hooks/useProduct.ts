@@ -153,7 +153,7 @@ export const useGetUserProducts = (
       if (!user_id) {
         throw new Error("user_id is required");
       }
-      return await productService.getUserProducts(
+      const result = await productService.getUserProducts(
         page,
         per_page,
         user_id,
@@ -161,6 +161,7 @@ export const useGetUserProducts = (
         "name",
         "asc"
       );
+      return result
     },
     enabled: !!user_id,
     initialData: { products: [], total: 0 },

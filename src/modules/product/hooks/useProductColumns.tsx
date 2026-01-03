@@ -18,7 +18,7 @@ export const useProductColumns = ({
         accessorKey: "name",
         cell: (info) => info.getValue(),
         header: () => <span>Nombre</span>,
-        minSize: COLUMN_MIN_SIZE,
+        minSize: 140,
       },
       {
         accessorKey: "brand",
@@ -31,6 +31,11 @@ export const useProductColumns = ({
         header: "Capacidad",
         cell: (info) => (
           <span>
+            {info.row.original.variant_name && (
+              <span className="text-secondary ">
+                {info.row.original.variant_name} - 
+              </span>
+            )}
             {info.row.original.capacity} {info.row.original.unit}
           </span>
         ),

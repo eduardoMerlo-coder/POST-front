@@ -11,4 +11,4 @@ export const DEFAULT_PAGE_SIZE = 10;
 /**
  * Tamaño mínimo de columna en la tabla
  */
-export const COLUMN_MIN_SIZE = 200;
+export const COLUMN_MIN_SIZE = 80;
